@@ -2,7 +2,7 @@
 #include "Types.h"
 #include <chrono>
 
-namespace Ho
+namespace Horang
 {
 	class DebugTime
 	{

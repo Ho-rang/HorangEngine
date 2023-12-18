@@ -2,7 +2,7 @@
 #include "DebugTime.h"
 #include <chrono>
 
-using namespace Ho;
+using namespace Horang;
 
 DebugTime GDebugTime;
 

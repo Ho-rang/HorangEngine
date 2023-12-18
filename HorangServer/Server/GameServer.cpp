@@ -1,13 +1,30 @@
 #include "pch.h"
-#include "DebugTime.h"
+#include "CoreGlobal.h"
+#include "ThreadManager.h"
 
-using Ho::DebugTime;
+#include <windows.h>
+#include <future>
+
+Horang::CoreGlobal core;
+
+
+void ThreadMain()
+{
+	while (true)
+	{
+		cout << LThreadId << endl;
+		std::this_thread::sleep_for(1s);
+	}
+}
 
 int main()
 {
-	DebugTime::TimeStart();
-	DebugTime::TimeEnd();
-	DebugTime::TimePrint();
+	for (int32 i = 0; i < 5; i++)
+	{
+		Horang::GThreadManager->Launch([]() {ThreadMain(); });
+	}
+
+	Horang::GThreadManager->Join();
 
 	return 0;
 }
