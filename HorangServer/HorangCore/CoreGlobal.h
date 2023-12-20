@@ -5,12 +5,4 @@
 namespace Horang
 {
 	extern class ThreadManager* GThreadManager;
-
-	// Manager 积己 家戈 鉴辑 包府
-	class CoreGlobal
-	{
-	public:
-		CoreGlobal();
-		~CoreGlobal();
-	};
 }

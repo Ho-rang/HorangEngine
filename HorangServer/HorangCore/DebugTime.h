@@ -1,6 +1,6 @@
 #pragma once
 #include "Types.h"
-#include <chrono>
+#include <string>
 
 namespace Horang
 {
@@ -19,8 +19,8 @@ namespace Horang
 	public:
 		static void TimeStart();
 		static void TimeEnd();
-		static void TimePrint();
-		static void TimeEndPrint();
+		static void TimePrint(std::string = "");
+		static void TimeEndPrint(std::string = "");
 
 	private:
 		static std::chrono::high_resolution_clock::time_point _startTime;

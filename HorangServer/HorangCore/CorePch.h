@@ -6,9 +6,9 @@
 
 #include "Types.h"
 
-#include "CoreGlobal.h"
-#include "CoreTLS.h"
 #include "CoreMacro.h"
+#include "CoreTLS.h"
+#include "CoreGlobal.h"
 
 #include <vector>
 #include <list>
@@ -22,6 +22,8 @@
 #include <iostream>
 
 #include <windows.h>
+
+#include "Lock.h"
 
 using std::cout;
 using std::endl;

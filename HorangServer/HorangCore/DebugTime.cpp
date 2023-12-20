@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "DebugTime.h"
-#include <chrono>
+#include <string>
 
 using namespace Horang;
 
@@ -24,17 +24,20 @@ void DebugTime::TimeEnd()
 	_endTime = std::chrono::high_resolution_clock::now();
 }
 
-void DebugTime::TimePrint()
+void DebugTime::TimePrint(std::string str)
 {
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(_endTime - _startTime).count();
+
+	if (str.length() > 0)
+		std::cout << str << std::endl;
 
 	std::cout << "Execution Time: " << duration << " microseconds." << std::endl;
 }
 
-void DebugTime::TimeEndPrint()
+void DebugTime::TimeEndPrint(std::string str)
 {
 	DebugTime::TimeEnd();
-	DebugTime::TimePrint();
+	DebugTime::TimePrint(str);
 }
 
 void DebugTime::TickStart()

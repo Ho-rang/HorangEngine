@@ -7,6 +7,12 @@
     <Filter Include="Main">
       <UniqueIdentifier>{ad2d912e-2ca1-4d9c-904f-13f8edd7e38f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Test">
+      <UniqueIdentifier>{3b7fe0d0-7cf7-4e3d-b923-259488d7b59b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\TestClass">
+      <UniqueIdentifier>{2a1a8869-4503-47f8-ada6-e3e1e0cba91d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameServer.cpp">
@@ -15,10 +21,22 @@
     <ClCompile Include="pch.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="LibTest.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
+    <ClCompile Include="TestLockClass.cpp">
+      <Filter>Test\TestClass</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="LibTest.h">
+      <Filter>Test</Filter>
+    </ClInclude>
+    <ClInclude Include="TestLockClass.h">
+      <Filter>Test\TestClass</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

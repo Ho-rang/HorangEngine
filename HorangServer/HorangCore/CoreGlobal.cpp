@@ -2,16 +2,21 @@
 #include "CoreGlobal.h"
 #include "ThreadManager.h"
 
-using namespace Horang;
-
-ThreadManager* Horang::GThreadManager = nullptr;
-
-CoreGlobal::CoreGlobal()
+// Manager 积己 家戈 鉴辑 包府
+namespace Horang
 {
-	GThreadManager = new ThreadManager();
-}
+	class CoreGlobal
+	{
+	public:
+		CoreGlobal()
+		{
+			GThreadManager = new ThreadManager();
+		}
+		~CoreGlobal()
+		{
+			delete GThreadManager;
+		}
+	} GCoreGlobal;
 
-CoreGlobal::~CoreGlobal()
-{
-	delete GThreadManager;
+	ThreadManager* Horang::GThreadManager = nullptr;
 }

@@ -11,7 +11,6 @@ ThreadManager::ThreadManager()
 
 ThreadManager::~ThreadManager()
 {
-	ThreadManager::Join();
 	this->Join();
 }
 
