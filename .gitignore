@@ -398,4 +398,4 @@ FodyWeavers.xsd
 *.sln.iml
 
 # HorangEngine 
-!HorangEngine/Libraries/**/[Dd]ebug/
+!**/Libraries/**/[Dd]ebug/*.lib
