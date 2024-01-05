@@ -398,6 +398,6 @@ FodyWeavers.xsd
 *.sln.iml
 
 # HorangEngine 
-!Libraries/
+!Libraries/*
 !Common/
 !Tools/
