@@ -15,6 +15,7 @@
 #include "DBBind.h"
 #include "DBConnectionRef.h"
 
+#include <codecvt>
 int main()
 {
 
@@ -23,19 +24,61 @@ int main()
 			// Todo
 			// Driver와 Server IP Database name은 별도의 config파일로 분리해서 관리하기
 		{
-			ASSERT_CRASH(GDBConnectionPool->Connect(1,
+			/*ASSERT_CRASH(GDBConnectionPool->Connect(1,
 				L"Driver={MySQL ODBC 8.2 Unicode Driver};\
 			Server=14.35.71.148;\
 			Database=VGunDB;\
 			User=VGun2;\
-			Password=akdgoTdj;"));
+			Password=akdgoTdj;"));*/
 
-			/*ASSERT_CRASH(GDBConnectionPool->Connect(1,
+			ASSERT_CRASH(GDBConnectionPool->Connect(1,
 				L"Driver={MySQL ODBC 8.2 Unicode Driver};\
 					Server=127.0.0.1;\
 					Database=VGunDB;\
 					User=VGun2;\
-					Password=akdgoTdj;"));*/
+					Password=akdgoTdj;"));
+		}
+
+		{
+			auto dbConn = GDBConnectionPool->Pop();
+
+			DBBind<2, 2> dbBind(*dbConn, L"SELECT uid, nickname FROM user WHERE id = (?) AND password = (?);");
+
+			string id = "test1";
+			string password = "test1";
+			std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+
+			wstring wid = converter.from_bytes(id).c_str();
+
+			dbBind.BindParam(0, converter.from_bytes(id).c_str());
+			dbBind.BindParam(1, converter.from_bytes(password).c_str());
+
+			int32 uid = 0;
+			WCHAR nickName[16] = L"";
+
+			dbBind.BindCol(0, uid);
+			dbBind.BindCol(1, nickName);
+
+			ASSERT_CRASH(dbBind.Execute());
+
+			if (dbBind.Fetch())
+			{
+				wcout << uid << " : " << nickName << endl;
+				// 성공 동작
+				Protocol::S_SIGNIN_OK packet;
+				packet.set_uid(uid);
+				packet.set_nickname(nickName);
+
+			}
+			else
+			{
+				// Null
+				Protocol::S_ERROR packet;
+				packet.set_errorcode(ErrorCode::SIGNIN_FAIL);
+
+			}
+
+			GDBConnectionPool->Push(dbConn);
 		}
 
 		{

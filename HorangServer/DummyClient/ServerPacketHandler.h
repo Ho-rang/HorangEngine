@@ -12,6 +12,8 @@ enum : uint16
 	PKT_S_ERROR = 1003,
 	PKT_C_SIGNIN = 1004,
 	PKT_S_SIGNIN_OK = 1005,
+	PKT_C_SIGNUP = 1006,
+	PKT_S_SIGNUP_OK = 1007,
 };
 
 // Custom Handlers
@@ -19,6 +21,7 @@ bool Handle_INVALID(PacketSessionRef& session, BYTE* buffer, int32 len);
 bool Handle_S_TEST(PacketSessionRef& session, Protocol::S_TEST& pkt);
 bool Handle_S_ERROR(PacketSessionRef& session, Protocol::S_ERROR& pkt);
 bool Handle_S_SIGNIN_OK(PacketSessionRef& session, Protocol::S_SIGNIN_OK& pkt);
+bool Handle_S_SIGNUP_OK(PacketSessionRef& session, Protocol::S_SIGNUP_OK& pkt);
 
 class ServerPacketHandler
 {
@@ -30,6 +33,7 @@ public:
 		GPacketHandler[PKT_S_TEST] = [](PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_TEST>(Handle_S_TEST, session, buffer, len); };
 		GPacketHandler[PKT_S_ERROR] = [](PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_ERROR>(Handle_S_ERROR, session, buffer, len); };
 		GPacketHandler[PKT_S_SIGNIN_OK] = [](PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_SIGNIN_OK>(Handle_S_SIGNIN_OK, session, buffer, len); };
+		GPacketHandler[PKT_S_SIGNUP_OK] = [](PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_SIGNUP_OK>(Handle_S_SIGNUP_OK, session, buffer, len); };
 	}
 
 	static bool HandlePacket(PacketSessionRef& session, BYTE* buffer, int32 len)
@@ -40,6 +44,7 @@ public:
 	static SendBufferRef MakeSendBuffer(Protocol::C_TEST& pkt) { return MakeSendBuffer(pkt, PKT_C_TEST); }
 	static SendBufferRef MakeSendBuffer(Protocol::C_MOVE& pkt) { return MakeSendBuffer(pkt, PKT_C_MOVE); }
 	static SendBufferRef MakeSendBuffer(Protocol::C_SIGNIN& pkt) { return MakeSendBuffer(pkt, PKT_C_SIGNIN); }
+	static SendBufferRef MakeSendBuffer(Protocol::C_SIGNUP& pkt) { return MakeSendBuffer(pkt, PKT_C_SIGNUP); }
 
 private:
 	template<typename PacketType, typename ProcessFunc>
