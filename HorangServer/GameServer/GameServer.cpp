@@ -44,14 +44,13 @@ int main()
 
 			DBBind<2, 2> dbBind(*dbConn, L"SELECT uid, nickname FROM user WHERE id = (?) AND password = (?);");
 
-			string id = "test1";
-			string password = "test1";
-			std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-
-			wstring wid = converter.from_bytes(id).c_str();
-
-			dbBind.BindParam(0, converter.from_bytes(id).c_str());
-			dbBind.BindParam(1, converter.from_bytes(password).c_str());
+			string id = u8"test1";
+			string password = u8"test1";
+			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+			auto a = converter.from_bytes(id).c_str();
+			auto b = converter.from_bytes(password).c_str();
+			dbBind.BindParam(0, a, ::wcslen(a));
+			dbBind.BindParam(1, b, ::wcslen(b));
 
 			int32 uid = 0;
 			WCHAR nickName[16] = L"";
@@ -66,16 +65,18 @@ int main()
 				wcout << uid << " : " << nickName << endl;
 				// 성공 동작
 				Protocol::S_SIGNIN_OK packet;
-				packet.set_uid(uid);
-				packet.set_nickname(nickName);
+				//packet.set_uid(uid);
+				//packet.set_nickname(nickName);
 
+				auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
 			}
 			else
 			{
-				// Null
+				// 실패 동작
 				Protocol::S_ERROR packet;
 				packet.set_errorcode(ErrorCode::SIGNIN_FAIL);
 
+				auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
 			}
 
 			GDBConnectionPool->Push(dbConn);

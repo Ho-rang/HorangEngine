@@ -5,7 +5,8 @@
 #include "GameSession.h"
 #include "DBConnectionPool.h"
 #include "DBBind.h"
-#include <codecvt>
+
+#include <boost/locale.hpp>
 
 PacketHandlerFunc GPacketHandler[UINT16_MAX];
 
@@ -35,18 +36,23 @@ bool Handle_C_MOVE(PacketSessionRef& session, Protocol::C_MOVE& pkt)
 
 bool Handle_C_SIGNIN(PacketSessionRef& session, Protocol::C_SIGNIN& pkt)
 {
-	auto dbConn = GDBConnectionPool->Pop();
+	if (pkt.id().length() > 40 || pkt.password().length() > 80)
+		return false;
 
+	auto dbConn = GDBConnectionPool->Pop();
+	
 	DBBind<2, 2> dbBind(*dbConn, L"SELECT uid, nickname FROM user WHERE id = (?) AND password = (?);");
 
-	//dbBind.BindParam(0, pkt.id());
-	//dbBind.BindParam(1, pkt.password());
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+
+	//dbBind.BindParam(0, converter.from_bytes(pkt.id()).c_str());
+	//dbBind.BindParam(0, converter.from_bytes(pkt.password()).c_str());
 
 	int32 uid = 0;
 	WCHAR nickName[16] = L"";
 
-	//dbBind.BindCol(0, uid);
-	//dbBind.BindCol(1, nickName);
+	dbBind.BindCol(0, uid);
+	dbBind.BindCol(1, nickName);
 
 	ASSERT_CRASH(dbBind.Execute());
 
@@ -55,15 +61,15 @@ bool Handle_C_SIGNIN(PacketSessionRef& session, Protocol::C_SIGNIN& pkt)
 		wcout << uid << " : " << nickName << endl;
 		// 성공 동작
 		Protocol::S_SIGNIN_OK packet;
-		packet.set_uid(uid);
-		packet.set_nickname(nickName);
+		//packet.set_uid(uid);
+		//packet.set_nickname(nickName);
 
 		auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
 		session->Send(sendBuffer);
 	}
 	else
 	{
-		// Null
+		// 실패 동작
 		Protocol::S_ERROR packet;
 		packet.set_errorcode(ErrorCode::SIGNIN_FAIL);
 

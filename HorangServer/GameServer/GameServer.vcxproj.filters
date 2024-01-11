@@ -48,6 +48,7 @@
     <ClCompile Include="Struct.pb.cc">
       <Filter>Protocol\ProtoSource</Filter>
     </ClCompile>
+    <ClCompile Include="DBConnector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -80,6 +81,7 @@
     <ClInclude Include="Struct.pb.h">
       <Filter>Protocol\ProtoSource</Filter>
     </ClInclude>
+    <ClInclude Include="DBConnector.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Common\Protobuf\bin\Protocol.proto">
