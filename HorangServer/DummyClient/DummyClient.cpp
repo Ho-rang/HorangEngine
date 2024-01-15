@@ -17,10 +17,6 @@ public:
 	virtual void OnConnected() override
 	{
 		cout << "Connected To Server" << endl;
-
-		Protocol::C_LOGIN pkt;
-		auto sendBuffer = ServerPacketHandler::MakeSendBuffer(pkt);
-		Send(sendBuffer);
 	}
 
 	virtual void OnRecvPacket(BYTE* buffer, int32 len) override
@@ -53,14 +49,14 @@ int main()
 		NetAddress(L"127.0.0.1", 7777),
 		MakeShared<IocpCore>(),
 		MakeShared<ServerSession>, // TODO : SessionManager 등
-		count
+		1
 	);
 
 	ASSERT_CRASH(service->Start());
 
-	this_thread::sleep_for(10s);
+	this_thread::sleep_for(1s);
 
-	for (int32 i = 0; i < 10; i++)
+	for (int32 i = 0; i < 1; i++)
 	{
 		GThreadManager->Launch([=]()
 			{
@@ -71,9 +67,30 @@ int main()
 			});
 	}
 
-	//this_thread::sleep_for(5s);
-	/*
-	Protocol::C_CHAT chatPkt;
+	this_thread::sleep_for(1s);
+
+	{
+		Protocol::C_SIGNUP signUpPkt;
+
+		signUpPkt.set_id("test1");
+		signUpPkt.set_password("test1");
+		signUpPkt.set_nickname("test1");
+
+		auto sendBuffer = ServerPacketHandler::MakeSendBuffer(signUpPkt);
+		service->BroadCast(sendBuffer);
+	}
+
+	{
+		Protocol::C_SIGNIN signInPkt;
+
+		signInPkt.set_id("test1");
+		signInPkt.set_password("test1");
+
+		auto sendBuffer = ServerPacketHandler::MakeSendBuffer(signInPkt);
+		service->BroadCast(sendBuffer);
+	}
+
+	/*Protocol::C_CHAT chatPkt;
 	chatPkt.set_msg(u8"Hello World");
 	auto sendBuffer = ServerPacketHandler::MakeSendBuffer(chatPkt);
 	while (true)
@@ -81,10 +98,10 @@ int main()
 		service->BroadCast(sendBuffer);
 
 		this_thread::sleep_for(1s);
-	}
-	*/
+	}*/
+	
 
-	for (int32 i = 0; i < 4; i++)
+	/*for (int32 i = 0; i < 4; i++)
 	{
 		GThreadManager->Launch([=]()
 			{
@@ -113,16 +130,9 @@ int main()
 					std::this_thread::sleep_for(1ms);
 				}
 			});
-	}
+	}*/
 
 
-	/*this_thread::sleep_for(1s);
-	Protocol::C_TEST packet;
-	packet.set_num(0);
-	auto sendBuffer = ServerPacketHandler::MakeSendBuffer(packet);
-	service->BroadCast(sendBuffer);
-
-	this_thread::sleep_for(20s);*/
 
 	GThreadManager->Join();
 

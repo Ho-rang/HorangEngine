@@ -16,6 +16,9 @@
     <Filter Include="Protocol\ProtoSource">
       <UniqueIdentifier>{d469e9c3-8b6d-4106-941f-59e2cd35ee61}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DB">
+      <UniqueIdentifier>{51373c16-32d3-467b-ba66-71eef3c574f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameServer.cpp">
@@ -48,7 +51,6 @@
     <ClCompile Include="Struct.pb.cc">
       <Filter>Protocol\ProtoSource</Filter>
     </ClCompile>
-    <ClCompile Include="DBConnector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -81,7 +83,9 @@
     <ClInclude Include="Struct.pb.h">
       <Filter>Protocol\ProtoSource</Filter>
     </ClInclude>
-    <ClInclude Include="DBConnector.h" />
+    <ClInclude Include="DBConnector.h">
+      <Filter>DB</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Common\Protobuf\bin\Protocol.proto">

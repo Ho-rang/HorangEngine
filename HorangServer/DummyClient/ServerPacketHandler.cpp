@@ -28,22 +28,34 @@ bool Handle_S_TEST(PacketSessionRef& session, Protocol::S_TEST& pkt)
 	return true;
 }
 
-bool Handle_S_LOGIN(PacketSessionRef& session, Protocol::S_LOGIN& pkt)
+bool Handle_S_ERROR(PacketSessionRef& session, Protocol::S_ERROR& pkt)
 {
-	//if (pkt.success() == false)
-	//	return false;
+	//cout << pkt.errorcode() << endl;
 
-	//if (pkt.players().size() == 0)
-	//{
-	//	// 캐릭터 없음
-	//}
+	switch (pkt.errorcode())
+	{
+		case 1001:
+			cout << "로그인 실패" << endl;
+		case 1002:
+			cout << "회원가입 실패" << endl;
+		default:
+			break;
+	}
 
-	//// 게임 입장
-	//Protocol::C_ENTER_GAME enterGamePkt;
-	//enterGamePkt.set_plyaerindex(0);
+	return true;
+}
 
-	//auto sendBuffer = ServerPacketHandler::MakeSendBuffer(enterGamePkt);
-	//session->Send(sendBuffer);
+bool Handle_S_SIGNIN_OK(PacketSessionRef& session, Protocol::S_SIGNIN_OK& pkt)
+{
+	cout << "로그인 성공! " << "UID : " << pkt.uid() << " NickName : " << pkt.nickname() << endl;
+
+
+	return true;
+}
+
+bool Handle_S_SIGNUP_OK(PacketSessionRef& session, Protocol::S_SIGNUP_OK& pkt)
+{
+	cout << "회원가입 성공!" << endl;
 
 	return true;
 }

@@ -5,8 +5,7 @@
 #include "GameSession.h"
 #include "DBConnectionPool.h"
 #include "DBBind.h"
-
-#include <boost/locale.hpp>
+#include "DBConnector.h"
 
 PacketHandlerFunc GPacketHandler[UINT16_MAX];
 
@@ -40,29 +39,31 @@ bool Handle_C_SIGNIN(PacketSessionRef& session, Protocol::C_SIGNIN& pkt)
 		return false;
 
 	auto dbConn = GDBConnectionPool->Pop();
-	
-	DBBind<2, 2> dbBind(*dbConn, L"SELECT uid, nickname FROM user WHERE id = (?) AND password = (?);");
 
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	DB::SignIn signIn(*dbConn);
 
-	//dbBind.BindParam(0, converter.from_bytes(pkt.id()).c_str());
-	//dbBind.BindParam(0, converter.from_bytes(pkt.password()).c_str());
+	WCHAR id[40] = L"";
+	WCHAR password[80] = L"";
+
+	signIn.In_Id(id, pkt.id());
+	signIn.In_Password(password, pkt.password());
 
 	int32 uid = 0;
 	WCHAR nickName[16] = L"";
 
-	dbBind.BindCol(0, uid);
-	dbBind.BindCol(1, nickName);
+	signIn.Out_Uid(uid);
+	signIn.Out_NickName(nickName);
 
-	ASSERT_CRASH(dbBind.Execute());
+	ASSERT_CRASH(signIn.Execute());
 
-	if (dbBind.Fetch())
+	if (signIn.Fetch() == true)
 	{
 		wcout << uid << " : " << nickName << endl;
+
 		// 성공 동작
 		Protocol::S_SIGNIN_OK packet;
-		//packet.set_uid(uid);
-		//packet.set_nickname(nickName);
+		packet.set_uid(uid);
+		packet.set_nickname(boost::locale::conv::utf_to_utf<char>(std::wstring(nickName)));
 
 		auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
 		session->Send(sendBuffer);
@@ -72,6 +73,8 @@ bool Handle_C_SIGNIN(PacketSessionRef& session, Protocol::C_SIGNIN& pkt)
 		// 실패 동작
 		Protocol::S_ERROR packet;
 		packet.set_errorcode(ErrorCode::SIGNIN_FAIL);
+
+		// Todo Log
 
 		auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
 		session->Send(sendBuffer);
@@ -84,11 +87,41 @@ bool Handle_C_SIGNIN(PacketSessionRef& session, Protocol::C_SIGNIN& pkt)
 
 bool Handle_C_SIGNUP(PacketSessionRef& session, Protocol::C_SIGNUP& pkt)
 {
-	
+	if (pkt.id().length() > 40 ||
+		pkt.password().length() > 80 ||
+		pkt.nickname().length() > 16)
+		return false;
 
-	//auto dbConn = GDBConnectionPool->Pop();
+	auto dbConn = GDBConnectionPool->Pop();
 
-	//GDBConnectionPool->Push(dbConn);
+	DB::SignUp signUp(*dbConn);
+
+	WCHAR id[40] = L"";
+	WCHAR password[80] = L"";
+	WCHAR nickName[16] = L"";
+
+	signUp.In_Id(id, pkt.id());
+	signUp.In_Password(password, pkt.password());
+	signUp.In_NickName(nickName, pkt.nickname());
+
+	if (signUp.Execute() && signUp.Fetch())
+	{
+		Protocol::S_SIGNUP_OK packet;
+
+		auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
+		session->Send(sendBuffer);
+	}
+	else
+	{
+		Protocol::S_ERROR packet;
+
+		packet.set_errorcode(ErrorCode::SIGNUP_FAIL);
+
+		auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
+		session->Send(sendBuffer);
+	}
+
+	GDBConnectionPool->Push(dbConn);
 
 	return true;
 }

@@ -44,51 +44,8 @@ int main()
 
 			DBBind<2, 2> dbBind(*dbConn, L"SELECT uid, nickname FROM user WHERE id = (?) AND password = (?);");
 
-			string id = u8"test1";
-			string password = u8"test1";
-			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-			auto a = converter.from_bytes(id).c_str();
-			auto b = converter.from_bytes(password).c_str();
-			dbBind.BindParam(0, a, ::wcslen(a));
-			dbBind.BindParam(1, b, ::wcslen(b));
-
-			int32 uid = 0;
-			WCHAR nickName[16] = L"";
-
-			dbBind.BindCol(0, uid);
-			dbBind.BindCol(1, nickName);
-
-			ASSERT_CRASH(dbBind.Execute());
-
-			if (dbBind.Fetch())
-			{
-				wcout << uid << " : " << nickName << endl;
-				// 성공 동작
-				Protocol::S_SIGNIN_OK packet;
-				//packet.set_uid(uid);
-				//packet.set_nickname(nickName);
-
-				auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
-			}
-			else
-			{
-				// 실패 동작
-				Protocol::S_ERROR packet;
-				packet.set_errorcode(ErrorCode::SIGNIN_FAIL);
-
-				auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
-			}
-
-			GDBConnectionPool->Push(dbConn);
-		}
-
-		{
-			auto dbConn = GDBConnectionPool->Pop();
-
-			DBBind<2, 2> dbBind(*dbConn, L"SELECT uid, nickname FROM user WHERE id = (?) AND password = (?);");
-
 			WCHAR a[40] = L"test1";
-			WCHAR b[80] = L"test2";
+			WCHAR b[80] = L"test1";
 			dbBind.BindParam(0, a);
 			dbBind.BindParam(1, b);
 
@@ -102,18 +59,19 @@ int main()
 
 			if (dbBind.Fetch())
 			{
-				wcout << uid << " : " << nickName << endl;
+				wcout << "First :" << uid << " : " << nickName << endl;
 			}
 			else
 			{
 				// Null
+				wcout << "Fetch fail" << endl;
 			}
 
 			GDBConnectionPool->Push(dbConn);
 		}
 
 		// 회원가입
-		for (int32 i = 0; i < 0; i++)
+		/*for (int32 i = 0; i < 0; i++)
 		{
 			auto dbConn = GDBConnectionPool->Pop();
 
@@ -128,8 +86,8 @@ int main()
 			WCHAR nickName[30] = L"Test";
 			dbBind.BindParam(2, nickName);
 
-			/*TIMESTAMP_STRUCT ts = { 2023, 11, 5 };
-			dbBind.BindParam(2, ts);*/
+			TIMESTAMP_STRUCT ts = { 2023, 11, 5 };
+			dbBind.BindParam(2, ts);
 
 			ASSERT_CRASH(dbBind.Execute());
 
@@ -158,10 +116,10 @@ int main()
 			}
 
 			GDBConnectionPool->Push(dbConn);
-		}
+		}*/
 
 		// Read ID
-		{
+		/* {
 			auto dbConn = GDBConnectionPool->Pop();
 
 			DBBind<2, 3> dbBind(*dbConn, L"SELECT uid, id, nickname FROM user WHERE id = (?) AND password = (?)");
@@ -187,69 +145,9 @@ int main()
 			}
 
 			GDBConnectionPool->Push(dbConn);
-		}
+		}*/
 
-		// Read
-		{
-			//auto dbConn = GDBConnectionPool->Pop();
-
-			//DBBind<1, 4> dbBind(*dbConn, L"SELECT id, gold, name, createDate FROM Gold WHERE gold = (?)");
-
-			//int32 gold = 100;
-			//dbBind.BindParam(0, gold);
-
-			//int32 outId = 0;
-			//int32 outGold = 0;
-			//WCHAR outName[100];
-			//TIMESTAMP_STRUCT outDate = {};
-
-			//dbBind.BindCol(0, OUT outId);
-			//dbBind.BindCol(1, OUT outGold);
-			//dbBind.BindCol(2, OUT outName);
-			//dbBind.BindCol(3, OUT outDate);
-
-			//ASSERT_CRASH(dbBind.Execute());
-
-
-			//dbConn->Unbind();
-
-			//{
-			//	/*int32 gold = 100;
-			//	SQLLEN len = 0;
-			//	ASSERT_CRASH(dbConn->BindParam(1, &gold, &len));
-
-			//	int32 outId = 0;
-			//	SQLLEN outIdLen = 0;
-			//	ASSERT_CRASH(dbConn->BindCol(1, &outId, &outIdLen));
-
-			//	int32 outGold = 0;
-			//	SQLLEN outGoldLen = 0;
-			//	ASSERT_CRASH(dbConn->BindCol(2, &outGold, &outGoldLen));
-
-			//	WCHAR outName[100];
-			//	SQLLEN outNameLen = 0;
-			//	ASSERT_CRASH(dbConn->BindCol(3, outName, len32(outName), &outNameLen));
-
-			//	TIMESTAMP_STRUCT outDate = {};
-			//	SQLLEN outDateLen = 0;
-			//	ASSERT_CRASH(dbConn->BindCol(4, &outDate, &outDateLen));
-
-
-			//	ASSERT_CRASH(dbConn->Execute(L"SELECT id, gold, name, createDate FROM Gold WHERE gold = (?)"));*/
-			//}
-
-
-			//wcout.imbue(locale("kor"));
-			//while (dbConn->Fetch())
-			//{
-			//	wcout << "id : " << outId << " gold : " << outGold << " name : " << outName << endl;
-			//	wcout << "Date : " << outDate.year << "/" << outDate.month << "/" << outDate.day << endl;
-			//}
-			//GDBConnectionPool->Push(dbConn);
-		}
 	}
-
-
 
 	//
 	GSessionManager = new GameSessionManager();
