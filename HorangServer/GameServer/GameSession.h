@@ -1,13 +1,13 @@
 #pragma once
 #include "Session.h"
 
-class GameSession : public PacketSession
+class GameSession : public Horang::PacketSession
 {
 public:
 
 	virtual ~GameSession() override
 	{
-		cout << "~GameSession" << endl;
+		std::cout << "~GameSession" << std::endl;
 	}
 	
 	virtual void OnConnected() override;
@@ -19,5 +19,5 @@ public:
 	virtual void OnSend(int32 len) override;
 
 public:
-	Vector<PlayerRef> _players;
+	Horang::Vector<PlayerRef> _players;
 };

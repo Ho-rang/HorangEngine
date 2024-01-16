@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "NetAddress.h"
 
+using namespace Horang;
+
 NetAddress::NetAddress(SOCKADDR_IN sockAddr)
 	: _sockAddr(sockAddr)
 {

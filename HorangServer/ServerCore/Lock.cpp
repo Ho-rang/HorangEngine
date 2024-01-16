@@ -3,6 +3,8 @@
 #include "CoreTLS.h"
 #include "DeadLockProfiler.h"
 
+using namespace Horang;
+
 void Lock::WriteLock(const char* name)
 {
 #if _DEBUG
@@ -35,7 +37,7 @@ void Lock::WriteLock(const char* name)
 		if (::GetTickCount64() - beginTick >= ACQUIRE_TIMEOUT_TICK)
 			CRASH("LOCK_TIMEOUT");
 
-		this_thread::yield();
+		std::this_thread::yield();
 	}
 }
 
@@ -82,7 +84,7 @@ void Lock::ReadLock(const char* name)
 		if (::GetTickCount64() - beginTick >= ACQUIRE_TIMEOUT_TICK)
 			CRASH("LOCK_TIMEOUT");
 
-		this_thread::yield();
+		std::this_thread::yield();
 	}
 }
 

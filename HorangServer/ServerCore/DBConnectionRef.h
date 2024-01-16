@@ -1,17 +1,20 @@
 #pragma once
 
-class DBConnection;
 
-class DBConnectionRef
+namespace Horang
 {
-public:
-	DBConnectionRef();
-	~DBConnectionRef();
+	class DBConnection;
 
-	DBConnection* operator->() const { return _dbConnection; }
-	DBConnection operator*() const;
+	class DBConnectionRef
+	{
+	public:
+		DBConnectionRef();
+		~DBConnectionRef();
 
-private:
-	DBConnection* _dbConnection;
-};
+		DBConnection* operator->() const { return _dbConnection; }
+		DBConnection operator*() const;
 
+	private:
+		DBConnection* _dbConnection;
+	};
+}

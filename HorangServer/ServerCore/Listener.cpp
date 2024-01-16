@@ -7,6 +7,8 @@
 
 #include "Service.h"
 
+using namespace Horang;
+
 /*
 	Listener
 */

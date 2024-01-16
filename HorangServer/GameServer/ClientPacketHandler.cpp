@@ -10,14 +10,14 @@
 PacketHandlerFunc GPacketHandler[UINT16_MAX];
 
 // 직접 만들기
-bool Handle_INVALID(PacketSessionRef& session, BYTE* buffer, int32 len)
+bool Handle_INVALID(Horang::PacketSessionRef& session, BYTE* buffer, int32 len)
 {
-	PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
+	Horang::PacketHeader* header = reinterpret_cast<Horang::PacketHeader*>(buffer);
 
 	return false;
 }
 
-bool Handle_C_TEST(PacketSessionRef& session, Protocol::C_TEST& pkt)
+bool Handle_C_TEST(Horang::PacketSessionRef& session, Protocol::C_TEST& pkt)
 {
 	Protocol::S_TEST patket;
 	patket.set_num(pkt.num() + 1);
@@ -28,12 +28,12 @@ bool Handle_C_TEST(PacketSessionRef& session, Protocol::C_TEST& pkt)
 	return true;
 }
 
-bool Handle_C_MOVE(PacketSessionRef& session, Protocol::C_MOVE& pkt)
+bool Handle_C_MOVE(Horang::PacketSessionRef& session, Protocol::C_MOVE& pkt)
 {
 	return true;
 }
 
-bool Handle_C_SIGNIN(PacketSessionRef& session, Protocol::C_SIGNIN& pkt)
+bool Handle_C_SIGNIN(Horang::PacketSessionRef& session, Protocol::C_SIGNIN& pkt)
 {
 	if (pkt.id().length() > 40 || pkt.password().length() > 80)
 		return false;
@@ -58,7 +58,7 @@ bool Handle_C_SIGNIN(PacketSessionRef& session, Protocol::C_SIGNIN& pkt)
 
 	if (signIn.Fetch() == true)
 	{
-		wcout << uid << " : " << nickName << endl;
+		std::wcout << uid << " : " << nickName << std::endl;
 
 		// 성공 동작
 		Protocol::S_SIGNIN_OK packet;
@@ -85,7 +85,7 @@ bool Handle_C_SIGNIN(PacketSessionRef& session, Protocol::C_SIGNIN& pkt)
 	return true;
 }
 
-bool Handle_C_SIGNUP(PacketSessionRef& session, Protocol::C_SIGNUP& pkt)
+bool Handle_C_SIGNUP(Horang::PacketSessionRef& session, Protocol::C_SIGNUP& pkt)
 {
 	if (pkt.id().length() > 40 ||
 		pkt.password().length() > 80 ||

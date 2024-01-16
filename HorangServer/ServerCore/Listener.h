@@ -2,36 +2,40 @@
 #include "IocpCore.h"
 #include "NetAddress.h"
 
-class AcceptEvent;
-class ServerService;
+class Horang::AcceptEvent;
+class Horang::ServerService;
 /*
 	Listener
 */
 
-class Listener : public IocpObject
+namespace Horang
 {
-public:
-	Listener() = default;
-	virtual ~Listener();
 
-public:
-	// 외부에서 사용
-	bool StartAccept(ServerServiceRef service);
-	void CloseSocket();
-	
-public:
-	// 인터페이스 구현
-	virtual HANDLE GetHandle() override;
-	virtual void Dispatch(class IocpEvent* iocpEvent, int32 numOfBytes = 0) override;
+	class Listener : public IocpObject
+	{
+	public:
+		Listener() = default;
+		virtual ~Listener();
 
-private:
-	// 수신 관련
-	void RegisterAccept(AcceptEvent* acceptEvent);
-	void ProcessAccept(AcceptEvent* acceptEvent);
+	public:
+		// 외부에서 사용
+		bool StartAccept(ServerServiceRef service);
+		void CloseSocket();
 
-protected:
-	SOCKET _socket = INVALID_SOCKET;
-	Vector<AcceptEvent*> _acceptEvents;
-	ServerServiceRef _service;
-};
+	public:
+		// 인터페이스 구현
+		virtual HANDLE GetHandle() override;
+		virtual void Dispatch(class IocpEvent* iocpEvent, int32 numOfBytes = 0) override;
 
+	private:
+		// 수신 관련
+		void RegisterAccept(AcceptEvent* acceptEvent);
+		void ProcessAccept(AcceptEvent* acceptEvent);
+
+	protected:
+		SOCKET _socket = INVALID_SOCKET;
+		Vector<AcceptEvent*> _acceptEvents;
+		ServerServiceRef _service;
+	};
+
+}

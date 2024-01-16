@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "RecvBuffer.h"
 
-
+using namespace Horang;
 /*
 	RecvBuffer
 */

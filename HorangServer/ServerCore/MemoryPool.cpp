@@ -1,17 +1,19 @@
 #include "pch.h"
 #include "MemoryPool.h"
 
+using namespace Horang;
+
 /*
 	MemoryPool
 */
 
-MemoryPool::MemoryPool(int32 allocSize)
+Horang::MemoryPool::MemoryPool(int32 allocSize)
 	: _allocSize(allocSize)
 {
 	::InitializeSListHead(&_header);
 }
 
-MemoryPool::~MemoryPool()
+Horang::MemoryPool::~MemoryPool()
 {
 	while (MemoryHeader* memory = static_cast<MemoryHeader*>(::InterlockedPopEntrySList(&_header)))
 	{
@@ -19,7 +21,7 @@ MemoryPool::~MemoryPool()
 	}
 }
 
-void MemoryPool::Push(MemoryHeader* ptr)
+void Horang::MemoryPool::Push(MemoryHeader* ptr)
 {
 	ptr->allocSize = 0;
 
@@ -30,7 +32,7 @@ void MemoryPool::Push(MemoryHeader* ptr)
 	_reserveCount.fetch_add(1);
 }
 
-MemoryHeader* MemoryPool::Pop()
+MemoryHeader* Horang::MemoryPool::Pop()
 {
 	// Pool 에서 하나 꺼내기
 

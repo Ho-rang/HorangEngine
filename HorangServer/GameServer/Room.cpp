@@ -17,7 +17,7 @@ void Room::Leave(PlayerRef player)
 	_players.erase(player->playerId);
 }
 
-void Room::BroadCast(SendBufferRef sendBuffer)
+void Room::BroadCast(Horang::SendBufferRef sendBuffer)
 {
 	WRITE_LOCK;
 	for (auto& p : _players)

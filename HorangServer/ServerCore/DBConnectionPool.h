@@ -1,26 +1,28 @@
 #pragma once
 #include "DBConnection.h"
 
-/*
-	DBConnectionPool
-*/
-
-class DBConnectionPool
+namespace Horang
 {
-public:
-	DBConnectionPool();
-	~DBConnectionPool();
+	/*
+		DBConnectionPool
+	*/
 
-	bool Connect(int32 connectionCount, const WCHAR* connectionString);
-	void Clear();
+	class DBConnectionPool
+	{
+	public:
+		DBConnectionPool();
+		~DBConnectionPool();
 
-	DBConnection* Pop();
-	void Push(DBConnection* connection);
+		bool Connect(int32 connectionCount, const WCHAR* connectionString);
+		void Clear();
 
-private:
-	USE_LOCK;
-	SQLHENV _environment = SQL_NULL_HANDLE;
+		DBConnection* Pop();
+		void Push(DBConnection* connection);
 
-	Vector<DBConnection*> _connections;
-};
+	private:
+		USE_LOCK;
+		SQLHENV _environment = SQL_NULL_HANDLE;
 
+		Vector<DBConnection*> _connections;
+	};
+}

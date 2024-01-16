@@ -4,7 +4,7 @@ class Room
 public:
 	void Enter(PlayerRef player);
 	void Leave(PlayerRef player);
-	void BroadCast(SendBufferRef sendBuffer);
+	void BroadCast(Horang::SendBufferRef sendBuffer);
 
 
 private:

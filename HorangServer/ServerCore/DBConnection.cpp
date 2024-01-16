@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "DBConnection.h"
 
+using namespace Horang;
+
 /*
 	DBConnection
 */
@@ -277,8 +279,8 @@ void DBConnection::HandleError(SQLRETURN ret)
 		// Todo Log 
 		// 로그 파일입출력으로 빼기
 
-		wcout.imbue(locale("kor"));
-		wcout << errMsg << endl;
+		std::wcout.imbue(std::locale("kor"));
+		std::wcout << errMsg << std::endl;
 
 		index++;
 	}

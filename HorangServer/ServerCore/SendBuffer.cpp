@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "SendBuffer.h"
 
+using namespace Horang;
+
 /*
 	SendBuffer
 */

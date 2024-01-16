@@ -16,8 +16,8 @@ void GameSession::OnDisconnected()
 
 void GameSession::OnRecvPacket(BYTE* buffer, int32 len)
 {
-	PacketSessionRef session = GetPacketSessionRef();
-	PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
+	Horang::PacketSessionRef session = GetPacketSessionRef();
+	Horang::PacketHeader* header = reinterpret_cast<Horang::PacketHeader*>(buffer);
 
 	// TODO 패킷 ID 대역 체크 - 클라 서버 or DB
 	ClientPacketHandler::HandlePacket(session, buffer, len);

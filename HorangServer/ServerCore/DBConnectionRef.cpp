@@ -2,6 +2,8 @@
 #include "DBConnectionRef.h"
 #include "DBConnectionPool.h"
 
+using namespace Horang;
+
 DBConnectionRef::DBConnectionRef()
 	: _dbConnection(GDBConnectionPool->Pop())
 {
@@ -14,7 +16,7 @@ DBConnectionRef::~DBConnectionRef()
 		GDBConnectionPool->Push(this->_dbConnection);
 }
 
-DBConnection DBConnectionRef::operator*() const
+Horang::DBConnection DBConnectionRef::operator*() const
 {
 	return *_dbConnection;
 }

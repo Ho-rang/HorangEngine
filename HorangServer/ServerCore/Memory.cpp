@@ -2,11 +2,12 @@
 #include "Memory.h"
 #include "MemoryPool.h"
 
+using namespace Horang;
 /*
 	Memory
 */
 
-Memory::Memory()
+Horang::Memory::Memory()
 {
 	int32 size = 0;
 	int32 tableIndex = 0;
@@ -46,7 +47,7 @@ Memory::Memory()
 	}
 }
 
-Memory::~Memory()
+Horang::Memory::~Memory()
 {
 	for (MemoryPool* pool : _pools)
 	{
@@ -56,7 +57,7 @@ Memory::~Memory()
 	_pools.clear();
 }
 
-void* Memory::Allocate(int32 size)
+void* Horang::Memory::Allocate(int32 size)
 {
 	MemoryHeader* header = nullptr;
 
@@ -68,7 +69,7 @@ void* Memory::Allocate(int32 size)
 	if (allocSize > MAX_ALLOC_SIZE)
 	{
 		// 메모리 풀링 최대 크기를 벗어나면 그냥 할당
-		header = reinterpret_cast<MemoryHeader*>(::_aligned_malloc(allocSize,SLIST_ALIGNMENT));
+		header = reinterpret_cast<MemoryHeader*>(::_aligned_malloc(allocSize, SLIST_ALIGNMENT));
 	}
 	else
 	{
@@ -77,10 +78,10 @@ void* Memory::Allocate(int32 size)
 	}
 #endif 
 
-	return MemoryHeader::AttachHeader(header,allocSize);
+	return MemoryHeader::AttachHeader(header, allocSize);
 }
 
-void Memory::Release(void* ptr)
+void Horang::Memory::Release(void* ptr)
 {
 	MemoryHeader* header = MemoryHeader::DetachHeader(ptr);
 

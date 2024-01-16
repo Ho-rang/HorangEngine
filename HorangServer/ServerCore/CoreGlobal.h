@@ -1,10 +1,15 @@
 #pragma once
 
-extern class ThreadManager* GThreadManager;
-extern class Memory* GMemory;
-extern class SendBufferManager* GSendBufferManager;
+namespace Horang {
+	class ThreadManager;
+	class Memory;
+	class SendBufferManager;
+	class DeadLockProfiler;
+	class DBConnectionPool;
+}
 
-
-extern class DeadLockProfiler* GDeadLockProfiler;
-
-extern class DBConnectionPool* GDBConnectionPool;
+extern Horang::ThreadManager* GThreadManager;
+extern Horang::Memory* GMemory;
+extern Horang::SendBufferManager* GSendBufferManager;
+extern Horang::DeadLockProfiler* GDeadLockProfiler;
+extern Horang::DBConnectionPool* GDBConnectionPool;

@@ -2,6 +2,7 @@
 #include "Allocator.h"
 #include "Memory.h"
 
+using namespace Horang;
 /*
 	BaseAllocator
 */

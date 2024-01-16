@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "DBConnectionPool.h"
 
+using namespace Horang;
+
 /*
 	DBConnectionPool
 */

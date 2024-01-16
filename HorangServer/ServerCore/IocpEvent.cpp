@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "IocpEvent.h"
 
+using namespace Horang;
+
 IocpEvent::IocpEvent(EventType type)
 	: eventType(type)
 {

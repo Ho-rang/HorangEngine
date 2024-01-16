@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "BufferWriter.h"
 
+using namespace Horang;
 
 /*
 	BufferWriter

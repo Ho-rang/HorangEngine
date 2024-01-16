@@ -6,23 +6,25 @@
 #include "BufferReader.h"
 #include "ServerPacketHandler.h"
 
-class ServerSession : public PacketSession
+using namespace std::chrono_literals;
+
+class ServerSession : public Horang::PacketSession
 {
 public:
 	~ServerSession()
 	{
-		cout << "~ServerSession" << endl;
+		std::cout << "~ServerSession" << std::endl;
 	}
 
 	virtual void OnConnected() override
 	{
-		cout << "Connected To Server" << endl;
+		std::cout << "Connected To Server" << std::endl;
 	}
 
 	virtual void OnRecvPacket(BYTE* buffer, int32 len) override
 	{
-		PacketSessionRef session = GetPacketSessionRef();
-		PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
+		Horang::PacketSessionRef session = GetPacketSessionRef();
+		Horang::PacketHeader* header = reinterpret_cast<Horang::PacketHeader*>(buffer);
 
 		ServerPacketHandler::HandlePacket(session, buffer, len);
 	}
@@ -34,7 +36,7 @@ public:
 
 	virtual void OnDisconnected() override
 	{
-		cout << "Disconnected" << endl;
+		std::cout << "Disconnected" << std::endl;
 	}
 };
 
@@ -45,16 +47,16 @@ int main()
 
 	int count = 64*4;
 
-	ClientServiceRef service = MakeShared<ClientService>(
-		NetAddress(L"127.0.0.1", 7777),
-		MakeShared<IocpCore>(),
-		MakeShared<ServerSession>, // TODO : SessionManager 등
+	Horang::ClientServiceRef service = Horang::MakeShared<Horang::ClientService>(
+		Horang::NetAddress(L"127.0.0.1", 7777),
+		Horang::MakeShared<Horang::IocpCore>(),
+		Horang::MakeShared<ServerSession>, // TODO : SessionManager 등
 		1
 	);
 
 	ASSERT_CRASH(service->Start());
 
-	this_thread::sleep_for(1s);
+	std::this_thread::sleep_for(1s);
 
 	for (int32 i = 0; i < 1; i++)
 	{
@@ -67,7 +69,7 @@ int main()
 			});
 	}
 
-	this_thread::sleep_for(1s);
+	std::this_thread::sleep_for(1s);
 
 	{
 		Protocol::C_SIGNUP signUpPkt;

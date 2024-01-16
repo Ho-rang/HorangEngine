@@ -3,26 +3,27 @@
 #include "Session.h"
 #include "Listener.h"
 
+using namespace Horang;
 /*
 	Service
 */
 
-Service::Service(ServiceType type, NetAddress address, IocpCoreRef core, SessionFactory factory, int32 maxSessionCount)
+Horang::Service::Service(ServiceType type, NetAddress address, IocpCoreRef core, SessionFactory factory, int32 maxSessionCount)
 	: _type(type), _netAddress(address), _iocpCore(core), _sessionFactory(factory), _maxSessionCount(maxSessionCount)
 {
 
 }
 
-Service::~Service()
+Horang::Service::~Service()
 {
 }
 
-void Service::CloseService()
+void Horang::Service::CloseService()
 {
 	// TODO
 }
 
-void Service::BroadCast(SendBufferRef sendBuffer)
+void Horang::Service::BroadCast(SendBufferRef sendBuffer)
 {
 	WRITE_LOCK;
 	for (const auto& session : _sessions)
@@ -31,7 +32,7 @@ void Service::BroadCast(SendBufferRef sendBuffer)
 	}
 }
 
-SessionRef Service::CreateSession()
+SessionRef Horang::Service::CreateSession()
 {
 	SessionRef session = _sessionFactory();
 	session->SetService(shared_from_this());
@@ -42,14 +43,14 @@ SessionRef Service::CreateSession()
 	return session;
 }
 
-void Service::AddSession(SessionRef session)
+void Horang::Service::AddSession(SessionRef session)
 {
 	WRITE_LOCK;
 	_sessionCount++;
 	_sessions.insert(session);
 }
 
-void Service::ReleaseSession(SessionRef session)
+void Horang::Service::ReleaseSession(SessionRef session)
 {
 	WRITE_LOCK;
 	ASSERT_CRASH(_sessions.erase(session) != 0);

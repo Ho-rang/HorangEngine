@@ -5,32 +5,35 @@
 #include <set>
 #include <unordered_map>
 
-/*
-	DeadLockProfiler
-*/
-
-class DeadLockProfiler
+namespace Horang
 {
-public:
-	void PushLock(const char* name);
-	void PopLock(const char* name);
-	void CheckCycle();
+	/*
+		DeadLockProfiler
+	*/
 
-private:
-	void Dfs(int32 index);
+	class DeadLockProfiler
+	{
+	public:
+		void PushLock(const char* name);
+		void PopLock(const char* name);
+		void CheckCycle();
 
-private:
-	unordered_map<const char*, int32> _nameToId;
-	unordered_map<int32, const char*> _idToName;
-	
-	map<int32, set<int32>> _lockHistory;
+	private:
+		void Dfs(int32 index);
 
-	Mutex _lock;
+	private:
+		std::unordered_map<const char*, int32> _nameToId;
+		std::unordered_map<int32, const char*> _idToName;
 
-private:
-	vector<int32> _discoveredOrder; // 노드가 발견된 순서 기록
-	int32 _discoveredCount = 0; // 노드가 발견된 순서
-	vector<bool> _finished; // Dfs(i) 번째가 종료됐는지 판별
-	vector<int32> _parent;
-};
+		std::map<int32, std::set<int32>> _lockHistory;
 
+		Mutex _lock;
+
+	private:
+		std::vector<int32> _discoveredOrder; // 노드가 발견된 순서 기록
+		int32 _discoveredCount = 0; // 노드가 발견된 순서
+		std::vector<bool> _finished; // Dfs(i) 번째가 종료됐는지 판별
+		std::vector<int32> _parent;
+	};
+
+}

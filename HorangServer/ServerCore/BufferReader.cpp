@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "BufferReader.h"
 
+using namespace Horang;
 
 /*
 	BufferReader

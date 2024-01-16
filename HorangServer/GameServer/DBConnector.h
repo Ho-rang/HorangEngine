@@ -27,10 +27,10 @@ namespace DB
 
 	/// DB Quary
 
-	class SignIn : public DBBind<2, 2>
+	class SignIn : public Horang::DBBind<2, 2>
 	{
 	public:
-		SignIn(DBConnection& conn)
+		SignIn(Horang::DBConnection& conn)
 			: DBBind(conn, L"SELECT uid, nickname FROM vgundb.user WHERE id = (?) AND password = (?);") {}
 
 	public:
@@ -70,10 +70,10 @@ namespace DB
 
 	};
 
-	class SignUp : public DBBind<3, 0>
+	class SignUp : public Horang::DBBind<3, 0>
 	{
 	public:
-		SignUp(DBConnection& conn)
+		SignUp(Horang::DBConnection& conn)
 			: DBBind(conn, L"INSERT INTO user (id, password, nickname) VALUES(?, ?, ?)") {}
 
 	public:

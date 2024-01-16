@@ -2,6 +2,7 @@
 #include "IocpCore.h"
 #include "IocpEvent.h"
 
+using namespace Horang;
 /*
 	IocpCore
 */

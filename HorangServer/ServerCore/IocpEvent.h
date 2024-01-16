@@ -1,92 +1,94 @@
 #pragma once
 
-class Session;
+class Horang::Session;
 
-enum class EventType : uint8
+namespace Horang
 {
-	Connect,
-	Disconnect,
-	Accept,
-	// PreRecv,
-	Recv,
-	Send,
-};
 
-/*
-	IocpEvent
-*/
+	enum class EventType : uint8
+	{
+		Connect,
+		Disconnect,
+		Accept,
+		// PreRecv,
+		Recv,
+		Send,
+	};
 
-class IocpEvent : public OVERLAPPED
-{
-public:
-	IocpEvent(EventType type);
+	/*
+		IocpEvent
+	*/
 
-	void Init();
+	class IocpEvent : public OVERLAPPED
+	{
+	public:
+		IocpEvent(EventType type);
 
-public:
-	EventType eventType;
-	IocpObjectRef owner;
-};
+		void Init();
 
-/// IocpEvent를 상속받는 클래스들은 Virtual 함수를 사용하면 안됨
-/// OVERLAPPED를 상속받아 첫번째 Offset이 OVERLAPPED 구조체를 가르키지만
-/// 상속받으면 가상 함수 테이블을 가리키기 때문에
+	public:
+		EventType eventType;
+		IocpObjectRef owner;
+	};
 
-/*
-	ConnectEvent
-*/
+	/// IocpEvent를 상속받는 클래스들은 Virtual 함수를 사용하면 안됨
+	/// OVERLAPPED를 상속받아 첫번째 Offset이 OVERLAPPED 구조체를 가르키지만
+	/// 상속받으면 가상 함수 테이블을 가리키기 때문에
 
-class ConnectEvent : public IocpEvent
-{
-public:
-	ConnectEvent() : IocpEvent(EventType::Connect) {}
-};
+	/*
+		ConnectEvent
+	*/
 
-/*
-	DisConnectEvent
-*/
+	class ConnectEvent : public IocpEvent
+	{
+	public:
+		ConnectEvent() : IocpEvent(EventType::Connect) {}
+	};
 
-class DisconnectEvent : public IocpEvent
-{
-public:
-	DisconnectEvent() : IocpEvent(EventType::Disconnect) {}
-};
+	/*
+		DisConnectEvent
+	*/
 
-/*
-	AcceptEvent
-*/
+	class DisconnectEvent : public IocpEvent
+	{
+	public:
+		DisconnectEvent() : IocpEvent(EventType::Disconnect) {}
+	};
 
-class AcceptEvent : public IocpEvent
-{
-public:
-	AcceptEvent() : IocpEvent(EventType::Accept) {}
+	/*
+		AcceptEvent
+	*/
 
-public:
-	SessionRef session = nullptr;
-};
+	class AcceptEvent : public IocpEvent
+	{
+	public:
+		AcceptEvent() : IocpEvent(EventType::Accept) {}
 
-/*
-	RecvEvent
-*/
+	public:
+		SessionRef session = nullptr;
+	};
 
-class RecvEvent : public IocpEvent
-{
-public:
-	RecvEvent() : IocpEvent(EventType::Recv) {}
-};
+	/*
+		RecvEvent
+	*/
 
-/*
-	SendEvent
-*/
+	class RecvEvent : public IocpEvent
+	{
+	public:
+		RecvEvent() : IocpEvent(EventType::Recv) {}
+	};
 
-class SendEvent : public IocpEvent
-{
-public:
-	SendEvent() : IocpEvent(EventType::Send) {}
+	/*
+		SendEvent
+	*/
 
-	// Temp
-	Vector<SendBufferRef> sendBuffers;
-};
+	class SendEvent : public IocpEvent
+	{
+	public:
+		SendEvent() : IocpEvent(EventType::Send) {}
 
+		// Temp
+		Vector<SendBufferRef> sendBuffers;
+	};
 
-
+}

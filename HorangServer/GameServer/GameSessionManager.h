@@ -9,11 +9,11 @@ class GameSessionManager
 public:
 	void Add(GameSessionRef session);
 	void Remove(GameSessionRef session);
-	void Broadcast(SendBufferRef sendBuffer);
+	void Broadcast(Horang::SendBufferRef sendBuffer);
 
 private:
 	USE_LOCK;
-	Set<GameSessionRef> _sessions;
+	Horang::Set<GameSessionRef> _sessions;
 };
 
 extern GameSessionManager* GSessionManager;

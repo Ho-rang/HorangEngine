@@ -7,14 +7,16 @@
 #include "SendBuffer.h"
 #include "DBConnectionPool.h"
 
-ThreadManager* GThreadManager = nullptr;
-Memory* GMemory = nullptr;
-SendBufferManager* GSendBufferManager = nullptr;
+using namespace Horang;
+
+Horang::ThreadManager* GThreadManager = nullptr;
+Horang::Memory* GMemory = nullptr;
+Horang::SendBufferManager* GSendBufferManager = nullptr;
 
 
-DeadLockProfiler* GDeadLockProfiler = nullptr;
+Horang::DeadLockProfiler* GDeadLockProfiler = nullptr;
 
-DBConnectionPool* GDBConnectionPool = nullptr;
+Horang::DBConnectionPool* GDBConnectionPool = nullptr;
 
 class CoreGlobal
 {
@@ -27,14 +29,14 @@ private:
 
 CoreGlobal::CoreGlobal()
 {
-	GThreadManager = new ThreadManager();
-	GMemory = new Memory();
-	GSendBufferManager = new SendBufferManager();
+	GThreadManager = new Horang::ThreadManager();
+	GMemory = new Horang::Memory();
+	GSendBufferManager = new Horang::SendBufferManager();
 
 
-	GDeadLockProfiler = new DeadLockProfiler();
+	GDeadLockProfiler = new Horang::DeadLockProfiler();
 
-	GDBConnectionPool = new DBConnectionPool();
+	GDBConnectionPool = new Horang::DBConnectionPool();
 
 	SocketUtils::Init();
 }
@@ -47,9 +49,8 @@ CoreGlobal::~CoreGlobal()
 
 
 	delete GDeadLockProfiler;
-	
+
 	delete GDBConnectionPool;
 
 	SocketUtils::Clear();
 }
-

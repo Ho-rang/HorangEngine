@@ -40,34 +40,34 @@ int main()
 		}
 
 		{
-			auto dbConn = GDBConnectionPool->Pop();
+			//auto dbConn = GDBConnectionPool->Pop();
 
-			DBBind<2, 2> dbBind(*dbConn, L"SELECT uid, nickname FROM user WHERE id = (?) AND password = (?);");
+			//Horang::DBBind<2, 2> dbBind(*dbConn, L"SELECT uid, nickname FROM user WHERE id = (?) AND password = (?);");
 
-			WCHAR a[40] = L"test1";
-			WCHAR b[80] = L"test1";
-			dbBind.BindParam(0, a);
-			dbBind.BindParam(1, b);
+			//WCHAR a[40] = L"test1";
+			//WCHAR b[80] = L"test1";
+			//dbBind.BindParam(0, a);
+			//dbBind.BindParam(1, b);
 
-			int32 uid = 0;
-			WCHAR nickName[16] = L"";
+			//int32 uid = 0;
+			//WCHAR nickName[16] = L"";
 
-			dbBind.BindCol(0, uid);
-			dbBind.BindCol(1, nickName);
+			//dbBind.BindCol(0, uid);
+			//dbBind.BindCol(1, nickName);
 
-			ASSERT_CRASH(dbBind.Execute());
+			//ASSERT_CRASH(dbBind.Execute());
 
-			if (dbBind.Fetch())
-			{
-				wcout << "First :" << uid << " : " << nickName << endl;
-			}
-			else
-			{
-				// Null
-				wcout << "Fetch fail" << endl;
-			}
+			//if (dbBind.Fetch())
+			//{
+			//	std::wcout << "First :" << uid << " : " << nickName << std::endl;
+			//}
+			//else
+			//{
+			//	// Null
+			//	std::wcout << "Fetch fail" << std::endl;
+			//}
 
-			GDBConnectionPool->Push(dbConn);
+			//GDBConnectionPool->Push(dbConn);
 		}
 
 		// 회원가입
@@ -153,10 +153,10 @@ int main()
 	GSessionManager = new GameSessionManager();
 	ClientPacketHandler::Init();
 
-	ServerServiceRef service = MakeShared<ServerService>(
-		NetAddress(L"127.0.0.1", 7777),
-		MakeShared<IocpCore>(),
-		MakeShared<GameSession>, // TODO : SessionManager 등
+	Horang::ServerServiceRef service = Horang::MakeShared<Horang::ServerService>(
+		Horang::NetAddress(L"127.0.0.1", 7777),
+		Horang::MakeShared<Horang::IocpCore>(),
+		Horang::MakeShared<GameSession>, // TODO : SessionManager 등
 		1
 	);
 

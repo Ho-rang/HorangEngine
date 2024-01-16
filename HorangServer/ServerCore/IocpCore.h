@@ -1,31 +1,35 @@
 #pragma once
 
-/*
-	IocpObject
-*/
-
-class IocpObject : public enable_shared_from_this<IocpObject>
+namespace Horang
 {
-public:
-	virtual HANDLE GetHandle() abstract;
-	virtual void Dispatch(class IocpEvent* iocpEvent, int32 numOfBytes = 0) abstract;
-};
 
-/*
-	IocpCore
-*/
+	/*
+		IocpObject
+	*/
 
-class IocpCore
-{
-public:
-	IocpCore();
-	~IocpCore();
+	class IocpObject : public std::enable_shared_from_this<IocpObject>
+	{
+	public:
+		virtual HANDLE GetHandle() abstract;
+		virtual void Dispatch(class IocpEvent* iocpEvent, int32 numOfBytes = 0) abstract;
+	};
 
-	HANDLE GetHandle() { return _iocpHandle; }
+	/*
+		IocpCore
+	*/
 
-	bool Register(IocpObjectRef iocpObject);
-	bool Dispatch(uint32 timeoutMs = INFINITE);
+	class IocpCore
+	{
+	public:
+		IocpCore();
+		~IocpCore();
 
-private:
-	HANDLE _iocpHandle;
-};
+		HANDLE GetHandle() { return _iocpHandle; }
+
+		bool Register(IocpObjectRef iocpObject);
+		bool Dispatch(uint32 timeoutMs = INFINITE);
+
+	private:
+		HANDLE _iocpHandle;
+	};
+}
