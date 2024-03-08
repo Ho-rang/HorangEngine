@@ -6,6 +6,7 @@
 #include "DBConnectionPool.h"
 #include "DBBind.h"
 #include "DBConnector.h"
+#include "AuthenticationManager.h"
 
 PacketHandlerFunc GPacketHandler[UINT16_MAX];
 
@@ -35,6 +36,7 @@ bool Handle_C_MOVE(Horang::PacketSessionRef& session, Protocol::C_MOVE& pkt)
 
 bool Handle_C_SIGNIN(Horang::PacketSessionRef& session, Protocol::C_SIGNIN& pkt)
 {
+	/*
 	if (pkt.id().length() > 40 || pkt.password().length() > 80)
 		return false;
 
@@ -82,11 +84,15 @@ bool Handle_C_SIGNIN(Horang::PacketSessionRef& session, Protocol::C_SIGNIN& pkt)
 
 	GDBConnectionPool->Push(dbConn);
 
+	*/
+	GAuthentication.PushJob(Horang::MakeShared<SignInJob>(session, pkt.id(), pkt.password()));
+
 	return true;
 }
 
 bool Handle_C_SIGNUP(Horang::PacketSessionRef& session, Protocol::C_SIGNUP& pkt)
 {
+	/*
 	if (pkt.id().length() > 40 ||
 		pkt.password().length() > 80 ||
 		pkt.nickname().length() > 16)
@@ -113,7 +119,7 @@ bool Handle_C_SIGNUP(Horang::PacketSessionRef& session, Protocol::C_SIGNUP& pkt)
 	{
 		if (result == 1)
 		{
-			Protocol::S_SIGNIN_OK packet;
+			Protocol::S_SIGNUP_OK packet;
 
 			auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
 			session->Send(sendBuffer);
@@ -140,6 +146,14 @@ bool Handle_C_SIGNUP(Horang::PacketSessionRef& session, Protocol::C_SIGNUP& pkt)
 	}
 
 	GDBConnectionPool->Push(dbConn);
+	*/
 
+	GAuthentication.PushJob(Horang::MakeShared<SignUpJob>(session, pkt.id(), pkt.password(),pkt.nickname()));
+
+	return true;
+}
+
+bool Handle_C_ROOM_CREATE(Horang::PacketSessionRef& session, Protocol::C_ROOM_CREATE& pkt)
+{
 	return true;
 }

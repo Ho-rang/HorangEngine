@@ -20,6 +20,9 @@
     <DebugSymbols>true</DebugSymbols>
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Build' ">
+    <OutputPath>bin\Build\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="PacketGenerator.py" />
     <Compile Include="ProtoParser.py" />

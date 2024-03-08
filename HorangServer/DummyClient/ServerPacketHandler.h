@@ -14,6 +14,7 @@ enum : uint16
 	PKT_S_SIGNIN_OK = 1005,
 	PKT_C_SIGNUP = 1006,
 	PKT_S_SIGNUP_OK = 1007,
+	PKT_C_ROOM_CREATE = 1008,
 };
 
 // Custom Handlers
@@ -45,6 +46,7 @@ public:
 	static Horang::SendBufferRef MakeSendBuffer(Protocol::C_MOVE& pkt) { return MakeSendBuffer(pkt, PKT_C_MOVE); }
 	static Horang::SendBufferRef MakeSendBuffer(Protocol::C_SIGNIN& pkt) { return MakeSendBuffer(pkt, PKT_C_SIGNIN); }
 	static Horang::SendBufferRef MakeSendBuffer(Protocol::C_SIGNUP& pkt) { return MakeSendBuffer(pkt, PKT_C_SIGNUP); }
+	static Horang::SendBufferRef MakeSendBuffer(Protocol::C_ROOM_CREATE& pkt) { return MakeSendBuffer(pkt, PKT_C_ROOM_CREATE); }
 
 private:
 	template<typename PacketType, typename ProcessFunc>

@@ -14,6 +14,7 @@ enum : uint16
 	PKT_S_SIGNIN_OK = 1005,
 	PKT_C_SIGNUP = 1006,
 	PKT_S_SIGNUP_OK = 1007,
+	PKT_C_ROOM_CREATE = 1008,
 };
 
 // Custom Handlers
@@ -22,6 +23,7 @@ bool Handle_C_TEST(Horang::PacketSessionRef& session, Protocol::C_TEST& pkt);
 bool Handle_C_MOVE(Horang::PacketSessionRef& session, Protocol::C_MOVE& pkt);
 bool Handle_C_SIGNIN(Horang::PacketSessionRef& session, Protocol::C_SIGNIN& pkt);
 bool Handle_C_SIGNUP(Horang::PacketSessionRef& session, Protocol::C_SIGNUP& pkt);
+bool Handle_C_ROOM_CREATE(Horang::PacketSessionRef& session, Protocol::C_ROOM_CREATE& pkt);
 
 class ClientPacketHandler
 {
@@ -34,6 +36,7 @@ public:
 		GPacketHandler[PKT_C_MOVE] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::C_MOVE>(Handle_C_MOVE, session, buffer, len); };
 		GPacketHandler[PKT_C_SIGNIN] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::C_SIGNIN>(Handle_C_SIGNIN, session, buffer, len); };
 		GPacketHandler[PKT_C_SIGNUP] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::C_SIGNUP>(Handle_C_SIGNUP, session, buffer, len); };
+		GPacketHandler[PKT_C_ROOM_CREATE] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::C_ROOM_CREATE>(Handle_C_ROOM_CREATE, session, buffer, len); };
 	}
 
 	static bool HandlePacket(Horang::PacketSessionRef& session, BYTE* buffer, int32 len)
