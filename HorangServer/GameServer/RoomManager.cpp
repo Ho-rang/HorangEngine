@@ -1,135 +1,111 @@
 #include "pch.h"
-//#include "RoomManager.h"
-//
-//#include "Room.h"
-//#include "Player.h"
-//#include <random>
-//RoomManager GRoomManager;
-//
-//RoomManager::RoomManager()
-//{
-//	// Temp
-//#ifdef _DEBUG
-//
-//	_roomPool.push_back(Horang::MakeShared<Room>("0000"));
-//	_roomPool.push_back(Horang::MakeShared<Room>("1111"));
-//	_roomPool.push_back(Horang::MakeShared<Room>("2222"));
-//	_roomPool.push_back(Horang::MakeShared<Room>("3333"));
-//	_roomPool.push_back(Horang::MakeShared<Room>("4444"));
-//	_roomPool.push_back(Horang::MakeShared<Room>("5555"));
-//
-//#else
-//	for (uint32 i = 1000; i < 10000; i++)
-//	{
-//		_roomPool.push_back(MakeShared<Room>(i));
-//	}
-//#endif // _DEBUG
-//
-//	for (uint32 i = 1111; i < 1112; i++)
-//	{
-//		_roomPool.push_back(Horang::MakeShared<Room>(i));
-//	}
-//
-//	std::random_device rd;
-//	std::mt19937 gen(rd());
-//
-//	std::shuffle(_roomPool.begin(), _roomPool.end(), gen);
-//}
-//
-//void RoomManager::Push(RoomRef room)
-//{
-//	WRITE_LOCK;
-//
-//	room->Init();
-//
-//	_roomBuffer.push(room);
-//
-//	if (_roomBuffer.size() == _rooms.size())
-//	{
-//		while (_roomBuffer.empty() == false)
-//		{
-//			auto roomBuf = _roomBuffer.front();
-//			_roomBuffer.pop();
-//
-//			_rooms.erase(roomBuf->_roomCode);
-//			_roomPool.push_back(roomBuf);
-//		}
-//	}
-//
-//	//_rooms.erase(room->_roomCode);
-//
-//	//_roomPool.push_back(room);
-//}
-//
-//RoomRef RoomManager::Pop()
-//{
-//	WRITE_LOCK;
-//
-//	if (_roomPool.empty())
-//	{
-//		while (_roomBuffer.empty() == false)
-//		{
-//			auto roomBuf = _roomBuffer.front();
-//			_roomBuffer.pop();
-//
-//			_rooms.erase(roomBuf->_roomCode);
-//			_roomPool.push_back(roomBuf);
-//		}
-//
-//		if (_roomPool.empty())
-//			return nullptr;
-//	}
-//
-//	RoomRef room = _roomPool.back();
-//	_roomPool.pop_back();
-//
-//	room->Init();
-//
-//	room->_roomState = Protocol::ROOM_STATE_LOBBY;
-//	_rooms[room->_roomCode] = room;
-//
-//	return room;
-//}
-//
-//RoomRef RoomManager::CreateRoom()
-//{
-//	return Pop();
-//}
-//
-//RoomRef RoomManager::GetRoom(uint32 roomCode)
-//{
-//	READ_LOCK;
-//
-//	auto room = this->_rooms.find(roomCode);
-//	if (room == this->_rooms.end())
-//		return nullptr;
-//
-//	return room->second;
-//}
-//
-//void RoomManager::LeaveRoom(PlayerRef player)
-//{
-//	if (player->_currentRoom == nullptr)
-//		return;
-//
-//	WRITE_LOCK;
-//
-//	auto room = player->_currentRoom;
-//
-//	// 빈 방 됨
-//	if (room->Leave(player) == false)
-//		this->Push(room);
-//}
-//
-//void RoomManager::Update()
-//{
-//	// Todo
-//	// 더 좋은 순회 방법 찾기
-//
-//	WRITE_LOCK;
-//
-//	for (auto& room : _rooms)
-//	{
-//		room.second->Update();
-//	}
-//}
+#include "RoomManager.h"
+#include "Room.h"
+#include "GameSession.h"
+#include "Player.h"
+#include "ClientPacketHandler.h"
+
+RoomManager GRoomManager;
+
+RoomManager::RoomManager()
+{
+	_rooms.reserve(10000);
+
+	for (int32 i = 1000; i < 10000; ++i)
+	{
+		auto room = Horang::MakeShared<Room>();
+		room->_roomId = i;
+		room->_roomCode = std::to_string(i);
+
+		_roomPool.push_back(room);
+	}
+}
+
+RoomManager::~RoomManager()
+{
+	// _rooms 모두 해제 후 _roomPool 모두 해제
+
+	for (const auto& [code, room] : _rooms)
+		room->Initialize();
+	_rooms.clear();
+
+	_roomPool.clear();
+}
+
+RoomRef RoomManager::CreateRoom(std::string roomName /*= "DefaultRoomName"*/, std::string password /*= ""*/, int32 maxPlayerCount /*= 6*/, bool isPrivate /*= false*/, bool isTeam /*= false*/)
+{
+	if (_roomPool.empty())
+		return nullptr;
+
+	auto room = _roomPool.back();
+	_roomPool.pop_back();
+
+	room->_roomName = roomName;
+	room->_password = password;
+
+	room->_maxPlayerCount = maxPlayerCount;
+	room->_isPrivate = isPrivate;
+	room->_isTeam = isTeam;
+
+	room->_state = Protocol::ROOM_STATE_LOBBY;
+
+	_rooms[room->_roomId] = room;
+	return room;
+}
+
+void RoomManager::DestroyRoom(RoomRef room)
+{
+	_rooms.erase(room->_roomId);
+
+	room->Initialize();
+	_roomPool.push_back(room);
+}
+
+void RoomManager::RoomListUpdate()
+{
+	static uint64 _lastRoomListUpdateTime = 0;
+
+	if (_lastRoomListUpdateTime > ::GetTickCount64())
+		return;
+
+	_roomList.Clear();
+
+	for (const auto& [code, room] : _rooms)
+	{
+		if (room->_state != Protocol::ROOM_STATE_LOBBY)
+			continue;
+
+		auto roomInfo = _roomList.add_roominfo();
+		room->GetRoomInfoList(roomInfo);
+	}
+
+	_lastRoomListUpdateTime = ::GetTickCount64() + 100;
+}
+
+void RoomManager::SendRoomList(PlayerWeakRef player)
+{
+	auto playerRef = player.lock();
+	if (playerRef == nullptr)
+		return;
+
+	this->RoomListUpdate();
+
+	auto sendBuffer = ClientPacketHandler::MakeSendBuffer(_roomList);
+	playerRef->ownerGameSession->Send(sendBuffer);
+}
+
+void RoomManager::EnterRoom(PlayerWeakRef player, int32 roomId)
+{
+	auto playerRef = player.lock();
+	if (playerRef == nullptr)
+		return;
+
+	auto room = _rooms[roomId];
+	if (room == nullptr)
+	{
+		playerRef->ownerGameSession->SendError(ErrorCode::ROOM_NOT_FOUND);
+		return;
+	}
+
+	room->Push(Horang::MakeShared<EnterJob>(room, player));
+}

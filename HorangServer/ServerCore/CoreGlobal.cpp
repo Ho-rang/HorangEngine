@@ -6,6 +6,8 @@
 #include "SocketUtils.h"
 #include "SendBuffer.h"
 #include "DBConnectionPool.h"
+#include "GlobalQueue.h"
+#include "JobTimer.h"
 
 using namespace Horang;
 
@@ -13,6 +15,8 @@ Horang::ThreadManager* GThreadManager = nullptr;
 Horang::Memory* GMemory = nullptr;
 Horang::SendBufferManager* GSendBufferManager = nullptr;
 
+Horang::GlobalQueue* GGlobalQueue = nullptr;
+Horang::JobTimer* GJobTimer = nullptr;
 
 Horang::DeadLockProfiler* GDeadLockProfiler = nullptr;
 
@@ -29,14 +33,16 @@ private:
 
 CoreGlobal::CoreGlobal()
 {
-	GThreadManager = new Horang::ThreadManager();
-	GMemory = new Horang::Memory();
-	GSendBufferManager = new Horang::SendBufferManager();
+	GThreadManager = new ThreadManager();
+	GMemory = new Memory();
+	GSendBufferManager = new SendBufferManager();
 
+	GGlobalQueue = new GlobalQueue();
+	GJobTimer = new JobTimer();
 
-	GDeadLockProfiler = new Horang::DeadLockProfiler();
+	GDeadLockProfiler = new DeadLockProfiler();
 
-	GDBConnectionPool = new Horang::DBConnectionPool();
+	GDBConnectionPool = new DBConnectionPool();
 
 	SocketUtils::Init();
 }
@@ -44,13 +50,15 @@ CoreGlobal::CoreGlobal()
 CoreGlobal::~CoreGlobal()
 {
 	delete GThreadManager;
-	delete GMemory;
 	delete GSendBufferManager;
 
-
-	delete GDeadLockProfiler;
+	delete GGlobalQueue;
+	delete GJobTimer;
 
 	delete GDBConnectionPool;
+	delete GMemory;
+
+	delete GDeadLockProfiler;
 
 	SocketUtils::Clear();
 }

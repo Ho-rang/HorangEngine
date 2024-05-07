@@ -25,27 +25,6 @@ void AuthenticationManager::SignUp()
 
 }
 
-void AuthenticationManager::PushJob(JobRef job)
-{
-	WRITE_LOCK;
-
-	_jobs.Push(job);
-}
-
-void AuthenticationManager::FlushJob()
-{
-	WRITE_LOCK;
-
-	while (true)
-	{
-		JobRef job = _jobs.Pop();
-		if (job == nullptr)
-			break;
-
- 		job->Execute();
-	}
-}
-
 void SignInJob::Execute()
 {
 	if (_id.length() > 40 || _password.length() > 80)
@@ -98,7 +77,7 @@ void SignInJob::Execute()
 	{
 		// 실패 동작
 		Protocol::S_ERROR packet;
-		packet.set_errorcode(ErrorCode::SIGNIN_FAIL);
+		packet.set_errorcode(static_cast<int32>(ErrorCode::SIGNIN_FAIL));
 
 		// Todo Log
 
@@ -156,8 +135,7 @@ void SignUpJob::Execute()
 	else
 	{
 		Protocol::S_ERROR packet;
-
-		packet.set_errorcode(ErrorCode::SIGNUP_FAIL);
+		packet.set_errorcode(static_cast<int32>(ErrorCode::SIGNUP_FAIL));
 
 		auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
 		_session->Send(sendBuffer);
