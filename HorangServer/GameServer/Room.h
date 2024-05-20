@@ -1,7 +1,7 @@
 #pragma once
 #include "JobQueue.h"
 
-class Room : public Horang::JobQueue, public std::enable_shared_from_this<Room>
+class Room : public Horang::JobQueue
 {
 	friend class RoomManager;
 
@@ -17,10 +17,10 @@ public:
 	Room();
 	~Room();
 
-	void Initialize();
+	void Initialize(int32 roomId = 0, std::string roomCode = "0000");
 
 public:
-	bool Enter(PlayerWeakRef playerWeak);
+	bool Enter(PlayerWeakRef playerWeak, std::string password = "");
 	bool Leave(PlayerWeakRef playerWeak);
 	void BroadCast(Horang::SendBufferRef sendBuffer);
 	void ClientUpdate(PlayerWeakRef playerWeak, Protocol::C_PLAY_UPDATE& pkt);
@@ -29,6 +29,13 @@ public:
 	void GameStart(PlayerWeakRef playerWeak);
 	void Update();
 
+public: // 방 기능
+	// 강퇴
+	// 팀 변경
+	void ChangeTeam(PlayerWeakRef playerWeak, Protocol::eTeamColor color);
+
+
+
 public: // 패킷 작성
 	Protocol::RoomInfo GetRoomInfo();
 	void GetRoomInfo(Protocol::RoomInfo& roomInfo);
@@ -36,7 +43,11 @@ public: // 패킷 작성
 	void GetRoomInfoList(Protocol::RoomInfo* roomInfo);
 
 	void SetUpdatePacket(Protocol::S_PLAY_UPDATE& packet);
-	void GetPlayerData(Protocol::PlayerData& playerData, int32 uid);
+	void GetPlayerData(Protocol::PlayerData* playerData, int32 uid);
+
+public:
+	RoomRef GetSharedRef() { return this->_roomRef; }
+	RoomWeakRef GetWeakRef() { return this->_roomWeakRef; }
 
 private:
 	int32 _roomId;
@@ -49,7 +60,6 @@ private:
 	std::string _password;
 
 	int32 _maxPlayerCount;
-	int32 _currentPlayerCount;
 
 	bool _isPrivate;
 	bool _isTeam;
@@ -58,6 +68,8 @@ private:
 	// 게임 시간
 	uint64 _gameTime;
 
+	RoomRef _roomRef;
+	RoomWeakRef _roomWeakRef;
 };
 
 /////////////////////////////
@@ -67,18 +79,19 @@ private:
 class EnterJob : public Horang::IJob
 {
 public:
-	EnterJob(RoomWeakRef room, PlayerWeakRef player)
-		: _room(room), _player(player)
+	EnterJob(RoomWeakRef room, PlayerWeakRef player, std::string password = "")
+		: _room(room), _player(player), _password(password)
 	{}
 
 	virtual void Execute() override
 	{
-		_room.lock()->Enter(_player);
+		_room.lock()->Enter(_player, _password);
 	}
 
 private:
 	RoomWeakRef _room;
 	PlayerWeakRef _player;
+	std::string _password;
 };
 
 class LeaveJob : public Horang::IJob
@@ -96,6 +109,24 @@ public:
 private:
 	RoomWeakRef _room;
 	PlayerWeakRef _player;
+};
+
+class TeamChangeJob : public Horang::IJob
+{
+public:
+	TeamChangeJob(RoomWeakRef room, PlayerWeakRef player, Protocol::eTeamColor color)
+		: _room(room), _player(player), _color(color)
+	{}
+
+	virtual void Execute() override
+	{
+		_room.lock()->ChangeTeam(_player, _color);
+	}
+
+private:
+	RoomWeakRef _room;
+	PlayerWeakRef _player;
+	Protocol::eTeamColor _color;
 };
 
 class GameStartJob : public Horang::IJob

@@ -15,11 +15,14 @@ void Horang::JobQueue::Push(Horang::JobRef job, bool pushOnly /*= false*/)
 	if (prevJobCount == 0)
 	{
 		if (LCurrentJobQueue == nullptr && pushOnly == false)
+		{
 			this->Execute();
+		}
 		else
+		{
 			GGlobalQueue->Push(this->shared_from_this());
+		}
 	}
-
 }
 
 void Horang::JobQueue::Execute()

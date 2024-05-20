@@ -71,6 +71,13 @@ int main()
 
 	std::this_thread::sleep_for(1s);
 
+	{
+		Protocol::C_AUTOLOGIN packet;
+		
+		auto sendBuffer = ServerPacketHandler::MakeSendBuffer(packet);
+		service->BroadCast(sendBuffer);
+	}
+
 	while (true)
 	{
 		int menu = 0;

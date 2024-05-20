@@ -18,7 +18,9 @@
 #include "AuthenticationManager.h"
 #include "RoomManager.h"
 #include "JobTimer.h"
+#include "Player.h"
 
+#include "Log.h"
 
 class TestClass : public Horang::JobQueue
 {
@@ -48,11 +50,8 @@ public:
 
 int main()
 {
-
 	{
-		//
-			// Todo
-			// Driver와 Server IP Database name은 별도의 config파일로 분리해서 관리하기
+		// Todo Driver와 Server IP Database name은 별도의 config파일로 분리해서 관리하기
 
 		ASSERT_CRASH
 		(
@@ -66,12 +65,14 @@ int main()
 					Password=akdgoTdj;"
 			)
 		);
-
 	}
 
 	//
 	GSessionManager = new GameSessionManager();
 	ClientPacketHandler::Init();
+	GRoomManager = Horang::MakeShared<RoomManager>();
+	GAuthentication = Horang::MakeShared<AuthenticationManager>();
+
 
 	Horang::ServerServiceRef service = Horang::MakeShared<Horang::ServerService>(
 		Horang::NetAddress(L"172.16.1.13", 7777),
@@ -100,14 +101,16 @@ int main()
 		);
 	}
 
-	GRoomManager.CreateRoom("TestRoom1", "", 6, false, false);
-	GRoomManager.CreateRoom("TestRoom2", "123", 5, true, false);
-	GRoomManager.CreateRoom("TestRoom3", "", 6, false, true);
+
+	GRoomManager->Initialize();
+
+	GRoomManager->CreateRoom("TestRoom1", "", 6, false, false,1);
+	GRoomManager->CreateRoom("TestRoom2", "123", 5, true, false,2);
+	GRoomManager->CreateRoom("TestRoom3", "", 6, false, true,3);
 
 	auto testClass = Horang::MakeShared<TestClass>();
-	GJobTimer->Reserve(1000, testClass->weak_from_this(), Horang::MakeShared<TestJob>(testClass));
-	GJobTimer->Reserve(3000, testClass->weak_from_this(), Horang::MakeShared<TestJob>(testClass));
-	GJobTimer->Reserve(10000, testClass->weak_from_this(), Horang::MakeShared<TestJob>(testClass));
+	GJobTimer->Reserve(100, testClass->weak_from_this(), Horang::MakeShared<TestJob>(testClass));
+	GJobTimer->Reserve(300, testClass->weak_from_this(), Horang::MakeShared<TestJob>(testClass));
 
 	GThreadManager->Join();
 

@@ -9,6 +9,7 @@ namespace Horang
 	class DBConnectionPool;
 	class GlobalQueue;
 	class JobTimer;
+	class Log;
 }
 
 extern Horang::ThreadManager* GThreadManager;

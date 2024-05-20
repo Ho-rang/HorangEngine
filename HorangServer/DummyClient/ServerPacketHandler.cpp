@@ -54,6 +54,20 @@ bool Handle_S_ERROR(Horang::PacketSessionRef& session, Protocol::S_ERROR& pkt)
 	return true;
 }
 
+bool Handle_S_CONNECTED(Horang::PacketSessionRef& session, Protocol::S_CONNECTED& pkt)
+{
+	// Todo
+	// Debug
+
+	std::cout << "자동 로그인" << std::endl;
+	Protocol::C_AUTOLOGIN packet;
+
+	auto sendBuffer = ServerPacketHandler::MakeSendBuffer(packet);
+	session->Send(sendBuffer);
+
+	return true;
+}
+
 bool Handle_S_SIGNIN_OK(Horang::PacketSessionRef& session, Protocol::S_SIGNIN_OK& pkt)
 {
 	std::cout << "로그인 성공! " << std::endl;
@@ -67,6 +81,19 @@ bool Handle_S_SIGNIN_OK(Horang::PacketSessionRef& session, Protocol::S_SIGNIN_OK
 		auto sendBuffer = ServerPacketHandler::MakeSendBuffer(packet);
 		session->Send(sendBuffer);*/
 	}
+
+	{
+		Protocol::C_ROOM_CREATE packet;
+
+		packet.set_roomname("TestRoom");
+		packet.set_isteam(true);
+		packet.set_map(Protocol::eRGBMap::DESERT);
+		packet.set_maxplayercount(6);
+
+		auto sendBuffer = ServerPacketHandler::MakeSendBuffer(packet);
+		session->Send(sendBuffer);
+	}
+
 
 	return true;
 }
@@ -91,7 +118,7 @@ bool Handle_S_ROOM_ENTER(Horang::PacketSessionRef& session, Protocol::S_ROOM_ENT
 	std::cout << "방 상태 : " << roomInfo.state() << std::endl;
 
 	for (auto user : roomInfo.users())
-		std::cout << "유저 ID : " << user.id() << " 닉네임 : " << user.nickname() << std::endl;
+		std::cout << "유저 UID : " << user.userinfo().uid() << " 닉네임 : " << user.userinfo().nickname() << std::endl;
 
 	return true;
 }
@@ -111,8 +138,7 @@ bool Handle_S_ANOTHER_ENTER_ROOM(Horang::PacketSessionRef& session, Protocol::S_
 	std::cout << "방 상태 : " << roomInfo.state() << std::endl;
 
 	for (auto user : roomInfo.users())
-		std::cout << "유저 ID : " << user.id() << " 닉네임 : " << user.nickname() << std::endl;
-
+		std::cout << "유저 UID : " << user.userinfo().uid() << " 닉네임 : " << user.userinfo().nickname() << std::endl;
 
 	Protocol::C_ROOM_START packet;
 	auto sendBuffer = ServerPacketHandler::MakeSendBuffer(packet);
@@ -131,6 +157,11 @@ bool Handle_S_ROOM_START(Horang::PacketSessionRef& session, Protocol::S_ROOM_STA
 	return true;
 }
 
+bool Handle_S_ROOM_CHANGE_TEAM(Horang::PacketSessionRef& session, Protocol::S_ROOM_CHANGE_TEAM& pkt)
+{
+	return true;
+}
+
 bool Handle_S_PLAY_UPDATE(Horang::PacketSessionRef& session, Protocol::S_PLAY_UPDATE& pkt)
 {
 	static int count = 0;
@@ -143,13 +174,15 @@ bool Handle_S_ROOM_LIST(Horang::PacketSessionRef& session, Protocol::S_ROOM_LIST
 {
 	// 방 리스트 출력
 
+	std::cout << "방 목록 수 : ";
 	std::cout << pkt.roominfo_size() << std::endl;
 
 	for (auto room : pkt.roominfo())
 	{
-		std::cout << "방 번호 : " << room.roomid() << std::endl;
-		std::cout << "방 코드 : " << room.roomcode() << std::endl;
-		std::cout << "방 상태 : " << room.state() << std::endl;
+		std::cout << "이름 : " << room.roomname();
+		std::cout << " - 방 코드 : " << room.roomcode();
+		std::cout << " - 방 상태 : " << room.state();
+		std::cout << " - " << room.currentplayercount() << "명" << std::endl;
 	}
 
 	return true;

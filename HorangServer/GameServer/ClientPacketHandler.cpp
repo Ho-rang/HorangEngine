@@ -9,6 +9,9 @@
 #include "DBConnector.h"
 #include "AuthenticationManager.h"
 #include "RoomManager.h"
+#include "Log.h"
+
+using Horang::DebugLog;
 
 PacketHandlerFunc GPacketHandler[UINT16_MAX];
 
@@ -33,6 +36,12 @@ bool Handle_C_TEST(Horang::PacketSessionRef& session, Protocol::C_TEST& pkt)
 
 bool Handle_C_MOVE(Horang::PacketSessionRef& session, Protocol::C_MOVE& pkt)
 {
+	return true;
+}
+
+bool Handle_C_AUTOLOGIN(Horang::PacketSessionRef& session, Protocol::C_AUTOLOGIN& pkt)
+{
+	GAuthentication->Push(Horang::MakeShared<AutoLoginJob>(session));
 	return true;
 }
 
@@ -87,7 +96,7 @@ bool Handle_C_SIGNIN(Horang::PacketSessionRef& session, Protocol::C_SIGNIN& pkt)
 	GDBConnectionPool->Push(dbConn);
 
 	*/
-	GAuthentication.Push(Horang::MakeShared<SignInJob>(session, pkt.id(), pkt.password()));
+	GAuthentication->Push(Horang::MakeShared<SignInJob>(session, pkt.id(), pkt.password()));
 
 	return true;
 }
@@ -150,7 +159,7 @@ bool Handle_C_SIGNUP(Horang::PacketSessionRef& session, Protocol::C_SIGNUP& pkt)
 	GDBConnectionPool->Push(dbConn);
 	*/
 
-	GAuthentication.Push(Horang::MakeShared<SignUpJob>(session, pkt.id(), pkt.password(), pkt.nickname()));
+	GAuthentication->Push(Horang::MakeShared<SignUpJob>(session, pkt.id(), pkt.password(), pkt.nickname()));
 
 	return true;
 }
@@ -159,7 +168,7 @@ bool Handle_C_ROOM_CREATE(Horang::PacketSessionRef& session, Protocol::C_ROOM_CR
 {
 	auto gameSession = static_pointer_cast<GameSession>(session);
 
-	GRoomManager.Push(Horang::MakeShared<CreateRoomJob>(gameSession->_player, pkt.roomname(),
+	GRoomManager->Push(Horang::MakeShared<CreateRoomJob>(gameSession->_player, pkt.roomname(),
 		pkt.password(),
 		pkt.maxplayercount(),
 		pkt.isprivate(),
@@ -169,11 +178,16 @@ bool Handle_C_ROOM_CREATE(Horang::PacketSessionRef& session, Protocol::C_ROOM_CR
 	return true;
 }
 
+bool Handle_C_ROOM_SETTING(Horang::PacketSessionRef& session, Protocol::C_ROOM_SETTING& pkt)
+{
+	return true;
+}
+
 bool Handle_C_ROOM_ENTER(Horang::PacketSessionRef& session, Protocol::C_ROOM_ENTER& pkt)
 {
 	auto gameSession = static_pointer_cast<GameSession>(session);
 
-	GRoomManager.Push(Horang::MakeShared<EnterRoomJob>(gameSession->_player, stoi(pkt.roomcode())));
+	GRoomManager->Push(Horang::MakeShared<EnterRoomJob>(gameSession->_player, stoi(pkt.roomcode())));
 
 	return true;
 }
@@ -205,6 +219,19 @@ bool Handle_C_ROOM_START(Horang::PacketSessionRef& session, Protocol::C_ROOM_STA
 	return true;
 }
 
+bool Handle_C_ROOM_CHANGE_TEAM(Horang::PacketSessionRef& session, Protocol::C_ROOM_CHANGE_TEAM& pkt)
+{
+	auto gameSession = static_pointer_cast<GameSession>(session);
+
+	auto room = gameSession->_room.lock();
+	if (room == nullptr)
+		return false;
+
+	room->Push(Horang::MakeShared<TeamChangeJob>(room, gameSession->_player, pkt.teamcolor()));
+
+	return true;
+}
+
 bool Handle_C_PLAY_UPDATE(Horang::PacketSessionRef& session, Protocol::C_PLAY_UPDATE& pkt)
 {
 	auto gameSession = static_pointer_cast<GameSession>(session);
@@ -222,7 +249,7 @@ bool Handle_C_ROOM_LIST_REQUEST(Horang::PacketSessionRef& session, Protocol::C_R
 {
 	auto gameSession = static_pointer_cast<GameSession>(session);
 
-	GRoomManager.Push(Horang::MakeShared<SendRoomListJob>(gameSession->_player));
+	GRoomManager->Push(Horang::MakeShared<SendRoomListJob>(gameSession->_player));
 
 	return true;
 }

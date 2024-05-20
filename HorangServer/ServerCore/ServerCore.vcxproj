@@ -181,6 +181,7 @@
     <ClInclude Include="Listener.h" />
     <ClInclude Include="Lock.h" />
     <ClInclude Include="LockQueue.h" />
+    <ClInclude Include="Log.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="MemoryPool.h" />
     <ClInclude Include="NetAddress.h" />
@@ -217,6 +218,7 @@
     <ClCompile Include="Listener.cpp" />
     <ClCompile Include="Lock.cpp" />
     <ClCompile Include="LockQueue.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="MemoryPool.cpp" />
     <ClCompile Include="NetAddress.cpp" />
