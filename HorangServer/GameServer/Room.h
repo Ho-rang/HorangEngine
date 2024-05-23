@@ -31,8 +31,10 @@ public:
 
 public: // ¹æ ±â´É
 	// °­Åð
+	void Kick(PlayerWeakRef playerWeak, std::string targetNickName = "");
+
 	// ÆÀ º¯°æ
-	void ChangeTeam(PlayerWeakRef playerWeak, Protocol::eTeamColor color);
+	void ChangeTeam(PlayerWeakRef playerWeak, Protocol::eTeamColor color, std::string targetNickName = "");
 
 
 
@@ -111,22 +113,41 @@ private:
 	PlayerWeakRef _player;
 };
 
-class TeamChangeJob : public Horang::IJob
+class KickJob : public Horang::IJob
 {
 public:
-	TeamChangeJob(RoomWeakRef room, PlayerWeakRef player, Protocol::eTeamColor color)
-		: _room(room), _player(player), _color(color)
+	KickJob(RoomWeakRef room, PlayerWeakRef player, std::string targetNickName)
+		: _room(room), _player(player), _targetNickName(targetNickName)
 	{}
 
 	virtual void Execute() override
 	{
-		_room.lock()->ChangeTeam(_player, _color);
+		_room.lock()->Kick(_player, _targetNickName);
+	}
+
+private:
+	RoomWeakRef _room;
+	PlayerWeakRef _player;
+	std::string _targetNickName;
+};
+
+class TeamChangeJob : public Horang::IJob
+{
+public:
+	TeamChangeJob(RoomWeakRef room, PlayerWeakRef player, Protocol::eTeamColor color, std::string targetNickName)
+		: _room(room), _player(player), _color(color), _targetNickName(targetNickName)
+	{}
+
+	virtual void Execute() override
+	{
+		_room.lock()->ChangeTeam(_player, _color, _targetNickName);
 	}
 
 private:
 	RoomWeakRef _room;
 	PlayerWeakRef _player;
 	Protocol::eTeamColor _color;
+	std::string _targetNickName;
 };
 
 class GameStartJob : public Horang::IJob

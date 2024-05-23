@@ -187,7 +187,7 @@ bool Handle_C_ROOM_ENTER(Horang::PacketSessionRef& session, Protocol::C_ROOM_ENT
 {
 	auto gameSession = static_pointer_cast<GameSession>(session);
 
-	GRoomManager->Push(Horang::MakeShared<EnterRoomJob>(gameSession->_player, stoi(pkt.roomcode())));
+	GRoomManager->Push(Horang::MakeShared<EnterRoomJob>(gameSession->_player, stoi(pkt.roomcode()), pkt.password()));
 
 	return true;
 }
@@ -227,7 +227,20 @@ bool Handle_C_ROOM_CHANGE_TEAM(Horang::PacketSessionRef& session, Protocol::C_RO
 	if (room == nullptr)
 		return false;
 
-	room->Push(Horang::MakeShared<TeamChangeJob>(room, gameSession->_player, pkt.teamcolor()));
+	room->Push(Horang::MakeShared<TeamChangeJob>(room, gameSession->_player, pkt.teamcolor(), pkt.targetnickname()));
+
+	return true;
+}
+
+bool Handle_C_ROOM_KICK(Horang::PacketSessionRef& session, Protocol::C_ROOM_KICK& pkt)
+{
+	auto gameSession = static_pointer_cast<GameSession>(session);
+
+	auto room = gameSession->_room.lock();
+	if (room == nullptr)
+		return false;
+
+	room->Push(Horang::MakeShared<KickJob>(room, gameSession->_player, pkt.targetnickname()));
 
 	return true;
 }

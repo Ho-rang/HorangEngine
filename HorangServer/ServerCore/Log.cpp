@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Log.h"
 
+
 HANDLE Horang::Log::_stdOut = INVALID_HANDLE_VALUE;
 
 Horang::Log::Log()

@@ -7,6 +7,9 @@
 #include "ClientPacketHandler.h"
 #include "Player.h"
 #include "GameSession.h"
+#include "Log.h"
+
+using Horang::LogBuffer;
 
 AuthenticationManagerRef GAuthentication;
 
@@ -17,6 +20,8 @@ AuthenticationManager::AuthenticationManager()
 
 bool AuthenticationManager::SignIn(Horang::PacketSessionRef session, std::string id, std::string password)
 {
+	LogBuffer log("SignIn");
+
 	{
 		// 로그인 되어있는지 검사
 		auto gameSession = static_pointer_cast<GameSession>(session);
@@ -29,12 +34,17 @@ bool AuthenticationManager::SignIn(Horang::PacketSessionRef session, std::string
 			auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
 			session->Send(sendBuffer);
 
+			log << "Already Login";
+
 			return false;
 		}
 	}
 
 	if (id.length() > 40 || password.length() > 80)
+	{
+		log << "Length Error";
 		return false;
+	}
 
 	auto dbConn = GDBConnectionPool->Pop();
 
@@ -57,6 +67,7 @@ bool AuthenticationManager::SignIn(Horang::PacketSessionRef session, std::string
 	if (signIn.Fetch() == true)
 	{
 		std::wcout << uid << " : " << nickName << std::endl;
+		log << "SignIn Success";
 
 		GameSessionRef gameSession = static_pointer_cast<GameSession>(session);
 
@@ -70,6 +81,9 @@ bool AuthenticationManager::SignIn(Horang::PacketSessionRef session, std::string
 			session->Send(sendBuffer);
 
 			GDBConnectionPool->Push(dbConn);
+
+			log << "Duplicate Login";
+
 			return false;
 		}
 		else
@@ -95,6 +109,9 @@ bool AuthenticationManager::SignIn(Horang::PacketSessionRef session, std::string
 			session->Send(sendBuffer);
 
 			GDBConnectionPool->Push(dbConn);
+
+			log << "Success";
+
 			return true;
 		}
 	}
@@ -110,6 +127,9 @@ bool AuthenticationManager::SignIn(Horang::PacketSessionRef session, std::string
 		session->Send(sendBuffer);
 
 		GDBConnectionPool->Push(dbConn);
+
+		log << "Fail";
+
 		return false;
 	}
 
@@ -119,10 +139,15 @@ bool AuthenticationManager::SignIn(Horang::PacketSessionRef session, std::string
 
 bool AuthenticationManager::SignUp(Horang::PacketSessionRef session, std::string id, std::string password, std::string nickname)
 {
+	LogBuffer log("SignUp");
+
 	if (id.length() > 40 ||
 		password.length() > 80 ||
 		nickname.length() > 16)
+	{
+		log << "Length Error";
 		return false;
+	}
 
 	auto dbConn = GDBConnectionPool->Pop();
 
@@ -143,6 +168,7 @@ bool AuthenticationManager::SignUp(Horang::PacketSessionRef session, std::string
 
 	if (signUp.Fetch())
 	{
+		log << "SignUp Success";
 		if (result == 1)
 		{
 			Protocol::S_SIGNUP_OK packet;
@@ -168,6 +194,8 @@ bool AuthenticationManager::SignUp(Horang::PacketSessionRef session, std::string
 
 		auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
 		session->Send(sendBuffer);
+
+		log << "Fail";
 	}
 
 	GDBConnectionPool->Push(dbConn);
@@ -204,6 +232,8 @@ void AuthenticationManager::PrintActiveAccount()
 
 void AuthenticationManager::AutoLogin(Horang::PacketSessionRef session)
 {
+	LogBuffer log("AutoLogin");
+
 	static int32 dummyId = 1;
 
 	{
@@ -215,6 +245,9 @@ void AuthenticationManager::AutoLogin(Horang::PacketSessionRef session)
 
 			auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
 			session->Send(sendBuffer);
+
+			log << "Auto Login Fail";
+
 			return;
 		}
 	}
@@ -224,10 +257,16 @@ void AuthenticationManager::AutoLogin(Horang::PacketSessionRef session)
 	{
 		count++;
 		if (count > 1000)
+		{
+			log << "Count Over";
 			ASSERT_CRASH(false);
+		}
 
 		if (dummyId > 1000)
+		{
+			log << "DummyID Over";
 			ASSERT_CRASH(false);
+		}
 
 		auto dbConn = GDBConnectionPool->Pop();
 
@@ -318,7 +357,8 @@ void AuthenticationManager::AutoLogin(Horang::PacketSessionRef session)
 		}
 	}
 
-	std::cout << "Auto Login - " << dummyId << std::endl;
+	//std::cout << "Auto Login - " << dummyId << std::endl;
+	log << "Auto Login : " << dummyId << "Success";
 }
 
 bool AuthenticationManager::isConnect(int32 uid)

@@ -4,6 +4,9 @@
 #include "GameSession.h"
 #include "Player.h"
 #include "ClientPacketHandler.h"
+#include "Log.h"
+
+using Horang::LogBuffer;
 
 RoomManagerRef GRoomManager;
 
@@ -44,8 +47,14 @@ void RoomManager::Initialize()
 
 RoomRef RoomManager::CreateRoom(std::string roomName /*= "DefaultRoomName"*/, std::string password /*= ""*/, int32 maxPlayerCount /*= 6*/, bool isPrivate /*= false*/, bool isTeam /*= false*/, int32 dummyClient /*= 0*/)
 {
+	LogBuffer log("CreateRoom");
+	log << "roomName: " << roomName << " password: " << password << " maxPlayerCount: " << maxPlayerCount << " isPrivate: " << isPrivate << " isTeam: " << isTeam << " dummyClient: " << dummyClient;
+
 	if (_roomPool.empty())
+	{
+		log << "RoomPool is empty";
 		return nullptr;
+	}
 
 	auto room = _roomPool.back();
 	_roomPool.pop_back();
@@ -73,19 +82,29 @@ RoomRef RoomManager::CreateRoom(std::string roomName /*= "DefaultRoomName"*/, st
 		room->_players[-i] = playerData;
 	}
 
+	log << "RoomId: " << room->_roomId << " RoomCode: " << room->_roomCode;
+	log << "Success";
+
 	return room->GetSharedRef();
 }
 
 void RoomManager::DestroyRoom(RoomRef room)
 {
+	LogBuffer log("DestroyRoom");
+	log << "RoomId: " << room->_roomId << " RoomCode: " << room->_roomCode;
+
 	_rooms.erase(room->_roomId);
 
 	room->Initialize(room->_roomId, room->_roomCode);
 	_roomPool.push_back(room);
+
+	log << "Success";
 }
 
 void RoomManager::RoomListUpdate()
 {
+	LogBuffer log("RoomListUpdate");
+
 	static uint64 _lastRoomListUpdateTime = 0;
 
 	if (_lastRoomListUpdateTime > ::GetTickCount64())
@@ -103,35 +122,51 @@ void RoomManager::RoomListUpdate()
 	}
 
 	_lastRoomListUpdateTime = ::GetTickCount64() + 100;
+
+	log << "Success";
 }
 
 void RoomManager::SendRoomList(PlayerWeakRef player)
 {
+	LogBuffer log("SendRoomList");
+
 	auto playerRef = player.lock();
 	if (playerRef == nullptr)
+	{
+		log.PlayerNullptr();
 		return;
+	}
+
+	log << "ID: " << playerRef->id << "NickName :" << playerRef->nickname;
 
 	this->RoomListUpdate();
 
-	Horang::DebugLog() << "SendRoomList";
-	std::cout << "SendRoomList" << std::endl;
-
 	auto sendBuffer = ClientPacketHandler::MakeSendBuffer(_roomList);
 	playerRef->ownerGameSession->Send(sendBuffer);
+
+	log << "Success";
 }
 
 void RoomManager::EnterRoom(PlayerWeakRef player, int32 roomId, std::string password /*= ""*/)
 {
+	LogBuffer log("EnterRoom");
 	auto playerRef = player.lock();
 	if (playerRef == nullptr)
+	{
+		log.PlayerNullptr();
 		return;
+	}
+
+	log << "ID: " << playerRef->id << "NickName :" << playerRef->nickname << "RoomId: " << roomId;
 
 	auto room = _rooms[roomId];
 	if (room == nullptr)
 	{
 		playerRef->ownerGameSession->SendError(ErrorCode::ROOM_NOT_FOUND);
+		log << "Room Not Found";
 		return;
 	}
 
-	room->Push(Horang::MakeShared<EnterJob>(room, player));
+	room->Push(Horang::MakeShared<EnterJob>(room, player, password));
+	log << "Success";
 }

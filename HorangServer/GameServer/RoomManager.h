@@ -99,16 +99,17 @@ private:
 class EnterRoomJob : public Horang::IJob
 {
 public:
-	EnterRoomJob(PlayerWeakRef player, int32 roomId)
-		: _player(player), _roomId(roomId)
+	EnterRoomJob(PlayerWeakRef player, int32 roomId, std::string password = "")
+		: _player(player), _roomId(roomId), _password(password)
 	{}
 
 	virtual void Execute() override
 	{
-		GRoomManager->EnterRoom(_player, _roomId);
+		GRoomManager->EnterRoom(_player, _roomId, _password);
 	}
 
 private:
 	PlayerWeakRef _player;
 	int32 _roomId;
+	std::string _password;
 };

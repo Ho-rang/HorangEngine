@@ -104,6 +104,7 @@ int main()
 
 	GRoomManager->Initialize();
 
+	/*
 	GRoomManager->CreateRoom("TestRoom1", "", 6, false, false,1);
 	GRoomManager->CreateRoom("TestRoom2", "123", 5, true, false,2);
 	GRoomManager->CreateRoom("TestRoom3", "", 6, false, true,3);
@@ -111,6 +112,7 @@ int main()
 	auto testClass = Horang::MakeShared<TestClass>();
 	GJobTimer->Reserve(100, testClass->weak_from_this(), Horang::MakeShared<TestJob>(testClass));
 	GJobTimer->Reserve(300, testClass->weak_from_this(), Horang::MakeShared<TestJob>(testClass));
+	*/
 
 	GThreadManager->Join();
 

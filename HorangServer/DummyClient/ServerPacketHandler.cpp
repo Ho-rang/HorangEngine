@@ -34,18 +34,6 @@ bool Handle_S_ERROR(Horang::PacketSessionRef& session, Protocol::S_ERROR& pkt)
 
 	switch (pkt.errorcode())
 	{
-		case 1001:
-			std::cout << "로그인 실패" << std::endl;
-			break;
-		case 1004:
-			std::cout << "회원가입 실패" << std::endl;
-			break;
-		case 1002:
-			std::cout << "ID 중복" << std::endl;
-			break;
-		case 1003:
-			std::cout << "닉네임 중복" << std::endl;
-			break;
 		default:
 			std::cout << "정의되지 않은 에러코드 : " << pkt.errorcode() << std::endl;
 			break;
@@ -100,31 +88,30 @@ bool Handle_S_SIGNIN_OK(Horang::PacketSessionRef& session, Protocol::S_SIGNIN_OK
 
 bool Handle_S_SIGNUP_OK(Horang::PacketSessionRef& session, Protocol::S_SIGNUP_OK& pkt)
 {
-	std::cout << "회원가입 성공!" << std::endl;
+	std::cout << "회원가입 성공" << std::endl;
 
 	return true;
 }
 
 bool Handle_S_ROOM_ENTER(Horang::PacketSessionRef& session, Protocol::S_ROOM_ENTER& pkt)
 {
-
 	auto& roomInfo = pkt.roominfo();
 
 	roomInfo.users();
 
-	std::cout << "방 입장 성공!" << std::endl;
-	std::cout << "방 번호 : " << roomInfo.roomid() << std::endl;
-	std::cout << "방 코드 : " << roomInfo.roomcode() << std::endl;
-	std::cout << "방 상태 : " << roomInfo.state() << std::endl;
+	std::cout << "방 입장" << std::endl;
+	std::cout << " 코드 : " << roomInfo.roomcode();
+	std::cout << " 상태 : " << roomInfo.state() << std::endl;
 
 	for (auto user : roomInfo.users())
-		std::cout << "유저 UID : " << user.userinfo().uid() << " 닉네임 : " << user.userinfo().nickname() << std::endl;
+		std::cout << "닉네임 : " << user.userinfo().nickname() << std::endl;
 
 	return true;
 }
 
 bool Handle_S_ROOM_LEAVE(Horang::PacketSessionRef& session, Protocol::S_ROOM_LEAVE& pkt)
 {
+
 	return true;
 }
 
@@ -158,6 +145,11 @@ bool Handle_S_ROOM_START(Horang::PacketSessionRef& session, Protocol::S_ROOM_STA
 }
 
 bool Handle_S_ROOM_CHANGE_TEAM(Horang::PacketSessionRef& session, Protocol::S_ROOM_CHANGE_TEAM& pkt)
+{
+	return true;
+}
+
+bool Handle_S_ROOM_KICK(Horang::PacketSessionRef& session, Protocol::S_ROOM_KICK& pkt)
 {
 	return true;
 }

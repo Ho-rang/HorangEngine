@@ -73,7 +73,7 @@ int main()
 
 	{
 		Protocol::C_AUTOLOGIN packet;
-		
+
 		auto sendBuffer = ServerPacketHandler::MakeSendBuffer(packet);
 		service->BroadCast(sendBuffer);
 	}
@@ -81,66 +81,40 @@ int main()
 	while (true)
 	{
 		int menu = 0;
-		std::cout << "1. Login" << std::endl;
-		std::cout << "2. Create Account" << std::endl;
-		std::cout << "3. Room List" << std::endl;
+		std::cout << "1. Room List" << std::endl;
+		std::cout << "2. Enter Room" << std::endl;
+		std::cout << "3. Create Room" << std::endl;
 		std::cout << " Select : ";
 		std::cin >> menu;
 
 		::system("cls");
 		if (menu == 1)
 		{
-			std::string id;
-			std::string password;
-
-			std::cout << "ID : ";
-			std::cin >> id;
-
-			std::cout << "Password : ";
-			std::cin >> password;
-
-			{
-				Protocol::C_SIGNIN signInPkt;
-
-				signInPkt.set_id(id);
-				signInPkt.set_password(password);
-
-				auto sendBuffer = ServerPacketHandler::MakeSendBuffer(signInPkt);
-				service->BroadCast(sendBuffer);
-			}
-		}
-		else if (menu == 2)
-		{
-			std::string id;
-			std::string password;
-			std::string nickname;
-
-			std::cout << "ID : ";
-			std::cin >> id;
-
-			std::cout << "Password : ";
-			std::cin >> password;
-
-			std::cout << "Nickname : ";
-			std::cin >> nickname;
-
-			{
-				Protocol::C_SIGNUP signUpPkt;
-
-				signUpPkt.set_id(id);
-				signUpPkt.set_password(password);
-				signUpPkt.set_nickname(nickname);
-
-				auto sendBuffer = ServerPacketHandler::MakeSendBuffer(signUpPkt);
-				service->BroadCast(sendBuffer);
-			}
-		}
-		else if (menu == 3)
-		{
 			Protocol::C_ROOM_LIST_REQUEST packet;
 
 			auto sendBuffer = ServerPacketHandler::MakeSendBuffer(packet);
 			service->BroadCast(sendBuffer);
+		}
+		else if (menu == 2)
+		{
+			Protocol::C_ROOM_ENTER packet;
+			std::string roomCode = "";
+			std::string password = "";
+
+			std::cout << "Room Code : ";
+			std::cin >> roomCode;
+			std::cout << "Password : ";
+			std::cin >> password;
+
+			packet.set_roomcode(roomCode);
+			packet.set_password(password);
+
+			auto sendBuffer = ServerPacketHandler::MakeSendBuffer(packet);
+			service->BroadCast(sendBuffer);
+		}
+		else if (menu == 3)
+		{
+			
 		}
 		::system("pause");
 		::system("cls");

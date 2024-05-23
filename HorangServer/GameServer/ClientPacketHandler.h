@@ -28,10 +28,12 @@ enum : uint16
 	PKT_S_ROOM_START = 1019,
 	PKT_C_ROOM_CHANGE_TEAM = 1020,
 	PKT_S_ROOM_CHANGE_TEAM = 1021,
-	PKT_C_PLAY_UPDATE = 1022,
-	PKT_S_PLAY_UPDATE = 1023,
-	PKT_C_ROOM_LIST_REQUEST = 1024,
-	PKT_S_ROOM_LIST = 1025,
+	PKT_C_ROOM_KICK = 1022,
+	PKT_S_ROOM_KICK = 1023,
+	PKT_C_PLAY_UPDATE = 1024,
+	PKT_S_PLAY_UPDATE = 1025,
+	PKT_C_ROOM_LIST_REQUEST = 1026,
+	PKT_S_ROOM_LIST = 1027,
 };
 
 // Custom Handlers
@@ -47,6 +49,7 @@ bool Handle_C_ROOM_ENTER(Horang::PacketSessionRef& session, Protocol::C_ROOM_ENT
 bool Handle_C_ROOM_LEAVE(Horang::PacketSessionRef& session, Protocol::C_ROOM_LEAVE& pkt);
 bool Handle_C_ROOM_START(Horang::PacketSessionRef& session, Protocol::C_ROOM_START& pkt);
 bool Handle_C_ROOM_CHANGE_TEAM(Horang::PacketSessionRef& session, Protocol::C_ROOM_CHANGE_TEAM& pkt);
+bool Handle_C_ROOM_KICK(Horang::PacketSessionRef& session, Protocol::C_ROOM_KICK& pkt);
 bool Handle_C_PLAY_UPDATE(Horang::PacketSessionRef& session, Protocol::C_PLAY_UPDATE& pkt);
 bool Handle_C_ROOM_LIST_REQUEST(Horang::PacketSessionRef& session, Protocol::C_ROOM_LIST_REQUEST& pkt);
 
@@ -68,6 +71,7 @@ public:
 		GPacketHandler[PKT_C_ROOM_LEAVE] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::C_ROOM_LEAVE>(Handle_C_ROOM_LEAVE, session, buffer, len); };
 		GPacketHandler[PKT_C_ROOM_START] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::C_ROOM_START>(Handle_C_ROOM_START, session, buffer, len); };
 		GPacketHandler[PKT_C_ROOM_CHANGE_TEAM] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::C_ROOM_CHANGE_TEAM>(Handle_C_ROOM_CHANGE_TEAM, session, buffer, len); };
+		GPacketHandler[PKT_C_ROOM_KICK] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::C_ROOM_KICK>(Handle_C_ROOM_KICK, session, buffer, len); };
 		GPacketHandler[PKT_C_PLAY_UPDATE] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::C_PLAY_UPDATE>(Handle_C_PLAY_UPDATE, session, buffer, len); };
 		GPacketHandler[PKT_C_ROOM_LIST_REQUEST] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::C_ROOM_LIST_REQUEST>(Handle_C_ROOM_LIST_REQUEST, session, buffer, len); };
 	}
@@ -88,6 +92,7 @@ public:
 	static Horang::SendBufferRef MakeSendBuffer(Protocol::S_ANOTHER_LEAVE_ROOM& pkt) { return MakeSendBuffer(pkt, PKT_S_ANOTHER_LEAVE_ROOM); }
 	static Horang::SendBufferRef MakeSendBuffer(Protocol::S_ROOM_START& pkt) { return MakeSendBuffer(pkt, PKT_S_ROOM_START); }
 	static Horang::SendBufferRef MakeSendBuffer(Protocol::S_ROOM_CHANGE_TEAM& pkt) { return MakeSendBuffer(pkt, PKT_S_ROOM_CHANGE_TEAM); }
+	static Horang::SendBufferRef MakeSendBuffer(Protocol::S_ROOM_KICK& pkt) { return MakeSendBuffer(pkt, PKT_S_ROOM_KICK); }
 	static Horang::SendBufferRef MakeSendBuffer(Protocol::S_PLAY_UPDATE& pkt) { return MakeSendBuffer(pkt, PKT_S_PLAY_UPDATE); }
 	static Horang::SendBufferRef MakeSendBuffer(Protocol::S_ROOM_LIST& pkt) { return MakeSendBuffer(pkt, PKT_S_ROOM_LIST); }
 

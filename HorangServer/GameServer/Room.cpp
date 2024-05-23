@@ -5,6 +5,7 @@
 #include "ClientPacketHandler.h"
 #include "RoomManager.h"
 #include "JobTimer.h"
+#include "Log.h"
 
 using namespace Horang;
 
@@ -46,12 +47,18 @@ void Room::Initialize(int32 roomId /*= 0*/, std::string roomCode /*= "0000"*/)
 
 bool Room::Enter(PlayerWeakRef playerWeak, std::string password)
 {
+	LogBuffer log("Enter");
+
 	auto player = playerWeak.lock();
 	if (player == nullptr)
+	{
+		log.PlayerNullptr();
 		return false;
+	}
 
 	if (password != this->_password)
 	{
+		log << "Password Incorrect";
 		player->ownerGameSession->SendError(ErrorCode::ROOM_PASSWORD_INCORRECT);
 		return false;
 	}
@@ -61,6 +68,7 @@ bool Room::Enter(PlayerWeakRef playerWeak, std::string password)
 	{
 		player->ownerGameSession->SendError(ErrorCode::ROOM_PLAYING);
 
+		log << "Room Playing";
 		return false;
 	}
 
@@ -68,8 +76,13 @@ bool Room::Enter(PlayerWeakRef playerWeak, std::string password)
 	if (_players.size() > 6)
 	{
 		player->ownerGameSession->SendError(ErrorCode::ROOM_FULL);
+
+		log << "Room Full";
+
 		return false;
 	}
+
+	log << "Player : " << player->nickname;
 
 	_players[player->uid] = { player };
 
@@ -102,31 +115,43 @@ bool Room::Enter(PlayerWeakRef playerWeak, std::string password)
 		this->BroadCast(sendBuffer);
 	}
 
+	log << "Success";
+
 	return true;
 }
 
 bool Room::Leave(PlayerWeakRef playerWeak)
 {
+	LogBuffer log("Leave");
+
 	auto player = playerWeak.lock();
-	if (player == nullptr)
-		return false;
 
 	// Todo 1명만 남았을때 방 삭제
-	if (this->_players.size() == 1)
+	if (this->_players.size() <= 1)
 	{
 		GRoomManager->Push(Horang::MakeShared<DestroyRoomJob>(this->GetWeakRef()));
+		log << "Destroy Room";
 		return true;
+	}
+
+
+	if (player == nullptr)
+	{
+		log.PlayerNullptr();
+		return false;
 	}
 
 	// 방장이 나갔을때
 	if (this->_players[player->uid].data.host() == true)
 	{
+		log << "Host Leave";
 		this->_players[player->uid].data.set_host(false);
 		for (auto& [uid, player] : this->_players)
 		{
 			if (player.data.host() == false)
 			{
 				player.data.set_host(true);
+				log << "New Host : " << player.data.userinfo().nickname();
 				break;
 			}
 		}
@@ -134,6 +159,8 @@ bool Room::Leave(PlayerWeakRef playerWeak)
 
 	this->_players.erase(player->uid);
 	player->ownerGameSession->_room.reset();
+
+	log << "Player : " << player->nickname;
 
 	// 나간거 다른 사람에게 알려주기
 	{
@@ -144,6 +171,15 @@ bool Room::Leave(PlayerWeakRef playerWeak)
 		auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
 		this->BroadCast(sendBuffer);
 	}
+
+	{
+		Protocol::S_ROOM_LEAVE packet;
+
+		auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
+		player->ownerGameSession->Send(sendBuffer);
+	}
+
+	log << "Success";
 
 	return true;
 }
@@ -182,15 +218,28 @@ void Room::ClientUpdate(PlayerWeakRef playerWeak, Protocol::C_PLAY_UPDATE& pkt)
 
 void Room::GameStart(PlayerWeakRef playerWeak)
 {
+	LogBuffer log("GameStart");
+
 	auto player = playerWeak.lock();
 	if (player == nullptr)
+	{
+		log.PlayerNullptr();
 		return;
+	}
 
 	if (this->_players[player->uid].data.host() == false)
+	{
+		log << "Not Host";
 		return;
+	}
 
 	if (_players.size() < 2)
+	{
+		log << "Not Enough Player";
 		return;
+	}
+
+	log << "Player : " << player->nickname;
 
 	this->_state = Protocol::eRoomState::ROOM_STATE_PLAY;
 	_gameTime = ::GetTickCount64();
@@ -199,12 +248,21 @@ void Room::GameStart(PlayerWeakRef playerWeak)
 	// Todo 플레이어 위치 설정
 	// Todo 플레이어 상태 설정
 	// Todo 플레이어 정보 보내주기
-	// Todo 게임 시작 정보 보내주기
 
+	// Todo 게임 시작 정보 보내주기
+	{
+		Protocol::S_ROOM_START packet;
+		this->GetRoomInfo(packet.mutable_roominfo());
+
+		auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
+		this->BroadCast(sendBuffer);
+	}
 
 	// Todo 게임 시작
 	Horang::JobRef job = Horang::MakeShared<UpdateJob>(this->GetSharedRef());
 	this->Push(job);
+
+	log << "Success";
 }
 
 void Room::Update()
@@ -235,28 +293,142 @@ void Room::Update()
 	}
 }
 
-void Room::ChangeTeam(PlayerWeakRef playerWeak, Protocol::eTeamColor color)
+void Room::Kick(PlayerWeakRef playerWeak, std::string targetNickName /*= ""*/)
 {
+	LogBuffer log("Kick");
+
 	if (this->_state != Protocol::ROOM_STATE_LOBBY)
+	{
+		log << "Not Lobby";
 		return;
+	}
 
 	auto playerRef = playerWeak.lock();
 	if (playerRef == nullptr)
+	{
+		log.PlayerNullptr();
 		return;
+	}
+
+	log << "Host : " << playerRef->nickname;
 
 	if (this->_players.find(playerRef->uid) == this->_players.end())
+	{
+		log << "Not Found Player";
 		return;
+	}
+
+	if (targetNickName.length() == 0)
+	{
+		log << "Not Found Target";
+		return;
+	}
+
+	if (_players[playerRef->uid].data.host() == false)
+	{
+		log << "Not Host";
+		return;
+	}
+
+	for (auto& [uid, playerData] : _players)
+	{
+		if (playerData.data.userinfo().nickname() != targetNickName ||
+			_players[playerRef->uid].data.userinfo().nickname() == targetNickName)
+			continue;
+
+		{
+			Protocol::S_ROOM_KICK packet;
+
+			auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
+			playerData.player.lock()->ownerGameSession->Send(sendBuffer);
+		}
+
+		this->_players.erase(uid);
+		playerRef->ownerGameSession->_room.reset();
+
+		{
+			Protocol::S_ANOTHER_LEAVE_ROOM packet;
+
+			auto roomInfo = packet.mutable_roominfo();
+			this->GetRoomInfo(roomInfo);
+
+			auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
+			this->BroadCast(sendBuffer);
+		}
+
+		log << "kickPlayer : " << targetNickName;
+		break;
+	}
+
+	log << "Success";
+}
+
+void Room::ChangeTeam(PlayerWeakRef playerWeak, Protocol::eTeamColor color, std::string targetNickName /*= ""*/)
+{
+	LogBuffer log("ChangeTeam");
+
+	if (this->_state != Protocol::ROOM_STATE_LOBBY)
+	{
+		log << "Not Lobby";
+		return;
+	}
+
+	auto playerRef = playerWeak.lock();
+	if (playerRef == nullptr)
+	{
+		log.PlayerNullptr();
+		return;
+	}
+
+	if (this->_players.find(playerRef->uid) == this->_players.end())
+	{
+		log << "Not Found Player";
+		return;
+	}
 
 	if (color == Protocol::TEAM_COLOR_NONE ||
 		color < Protocol::TEAM_COLOR_RED ||
 		color > Protocol::TEAM_COLOR_BLUE)
+	{
+		log << "Invalid Team Color";
 		return;
+	}
 
 	auto& player = _players[playerRef->uid];
 	if (player.data.team() == color)
+	{
+		log << "Same Team";
 		return;
+	}
 
-	player.data.set_team(color);
+	if (targetNickName.length() == 0)
+	{
+		log << "No Target";
+		return;
+	}
+
+	if (targetNickName == player.data.userinfo().nickname())
+	{
+		player.data.set_team(color);
+		log << "Change My Team";
+	}
+	else if (player.data.host())
+	{
+		for (auto& [uid, playerData] : _players)
+		{
+			if (playerData.data.userinfo().nickname() == targetNickName)
+			{
+				playerData.data.set_team(color);
+				log << "Change Target Team : " << targetNickName;
+				break;
+			}
+		}
+	}
+	else
+	{
+		log << "Not Host";
+		return;
+	}
 
 	// 방에 있는 사람들에게 보내주기
 	{
@@ -266,6 +438,8 @@ void Room::ChangeTeam(PlayerWeakRef playerWeak, Protocol::eTeamColor color)
 		auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
 		this->BroadCast(sendBuffer);
 	}
+
+	log << "Success";
 }
 
 Protocol::RoomInfo Room::GetRoomInfo()
@@ -332,5 +506,4 @@ void Room::GetPlayerData(Protocol::PlayerData* playerData, int32 uid)
 	//playerData->CopyFrom(_players[uid].data);
 	*playerData = _players[uid].data;
 	*playerData->mutable_userinfo() = _players[uid].data.userinfo();
-	std::cout << " TT : " << playerData->userinfo().nickname() << std::endl;
 }
