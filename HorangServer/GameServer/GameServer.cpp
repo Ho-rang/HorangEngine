@@ -48,11 +48,30 @@ public:
 	std::shared_ptr<TestClass> mTestClass;
 };
 
-int main()
+bool g_useDB = false;
+int g_gameTime = 60;
+
+int main(int argc, char* argv[])
 {
+	std::wstring ip = L"127.0.0.1";
+	int port = 7777;
+
+	if (argc >= 1)
+	{
+		std::string str(argv[1]);
+		ip = std::wstring(str.begin(), str.end());
+	}
+	if (argc >= 2)
+		port = atoi(argv[2]);
+	if (argc >= 3)
+		if (strcmp(argv[3], "true") == 0)
+			g_useDB = true;
+	if (argc >= 4)
+		g_gameTime = atoi(argv[4]);
+
+	if (g_useDB)
 	{
 		// Todo Driver와 Server IP Database name은 별도의 config파일로 분리해서 관리하기
-
 		ASSERT_CRASH
 		(
 			GDBConnectionPool->Connect
@@ -73,9 +92,12 @@ int main()
 	GRoomManager = Horang::MakeShared<RoomManager>();
 	GAuthentication = Horang::MakeShared<AuthenticationManager>();
 
+	std::wcout << L"Server IP : " << ip.c_str() << " : " << port << " " << g_useDB << std::endl;
+	std::wcout << L"GameTime : " << g_gameTime << " seconds" << std::endl;
 
+	// 172.16.1.13
 	Horang::ServerServiceRef service = Horang::MakeShared<Horang::ServerService>(
-		Horang::NetAddress(L"172.16.1.13", 7777),
+		Horang::NetAddress(ip.c_str(), port),
 		Horang::MakeShared<Horang::IocpCore>(),
 		Horang::MakeShared<GameSession>, // TODO : SessionManager 등
 		1
@@ -83,7 +105,7 @@ int main()
 
 	ASSERT_CRASH(service->Start());
 
-	for (int i = 0; i < std::thread::hardware_concurrency(); i++)
+	for (int i = 0; i < std::thread::hardware_concurrency() / 2; i++)
 	{
 		GThreadManager->Launch([=]()
 			{

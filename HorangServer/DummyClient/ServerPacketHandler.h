@@ -26,14 +26,26 @@ enum : uint16
 	PKT_S_ANOTHER_LEAVE_ROOM = 1017,
 	PKT_C_ROOM_START = 1018,
 	PKT_S_ROOM_START = 1019,
-	PKT_C_ROOM_CHANGE_TEAM = 1020,
-	PKT_S_ROOM_CHANGE_TEAM = 1021,
-	PKT_C_ROOM_KICK = 1022,
-	PKT_S_ROOM_KICK = 1023,
-	PKT_C_PLAY_UPDATE = 1024,
-	PKT_S_PLAY_UPDATE = 1025,
-	PKT_C_ROOM_LIST_REQUEST = 1026,
-	PKT_S_ROOM_LIST = 1027,
+	PKT_S_GAME_START = 1020,
+	PKT_S_GAME_END = 1021,
+	PKT_C_ROOM_CHANGE_TEAM = 1022,
+	PKT_S_ROOM_CHANGE_TEAM = 1023,
+	PKT_C_ROOM_KICK = 1024,
+	PKT_S_ROOM_KICK = 1025,
+	PKT_C_PLAY_UPDATE = 1026,
+	PKT_S_PLAY_UPDATE = 1027,
+	PKT_C_ROOM_LIST_REQUEST = 1028,
+	PKT_S_ROOM_LIST = 1029,
+	PKT_C_PLAY_JUMP = 1030,
+	PKT_S_PLAY_JUMP = 1031,
+	PKT_C_PLAY_SHOOT = 1032,
+	PKT_S_PLAY_SHOOT = 1033,
+	PKT_S_PLAY_KILL_DEATH = 1034,
+	PKT_S_PLAY_RESPAWN = 1035,
+	PKT_C_PLAY_ROLL = 1036,
+	PKT_S_PLAY_ROLL = 1037,
+	PKT_C_PLAY_RELOAD = 1038,
+	PKT_S_PLAY_RELOAD = 1039,
 };
 
 // Custom Handlers
@@ -48,10 +60,18 @@ bool Handle_S_ROOM_LEAVE(Horang::PacketSessionRef& session, Protocol::S_ROOM_LEA
 bool Handle_S_ANOTHER_ENTER_ROOM(Horang::PacketSessionRef& session, Protocol::S_ANOTHER_ENTER_ROOM& pkt);
 bool Handle_S_ANOTHER_LEAVE_ROOM(Horang::PacketSessionRef& session, Protocol::S_ANOTHER_LEAVE_ROOM& pkt);
 bool Handle_S_ROOM_START(Horang::PacketSessionRef& session, Protocol::S_ROOM_START& pkt);
+bool Handle_S_GAME_START(Horang::PacketSessionRef& session, Protocol::S_GAME_START& pkt);
+bool Handle_S_GAME_END(Horang::PacketSessionRef& session, Protocol::S_GAME_END& pkt);
 bool Handle_S_ROOM_CHANGE_TEAM(Horang::PacketSessionRef& session, Protocol::S_ROOM_CHANGE_TEAM& pkt);
 bool Handle_S_ROOM_KICK(Horang::PacketSessionRef& session, Protocol::S_ROOM_KICK& pkt);
 bool Handle_S_PLAY_UPDATE(Horang::PacketSessionRef& session, Protocol::S_PLAY_UPDATE& pkt);
 bool Handle_S_ROOM_LIST(Horang::PacketSessionRef& session, Protocol::S_ROOM_LIST& pkt);
+bool Handle_S_PLAY_JUMP(Horang::PacketSessionRef& session, Protocol::S_PLAY_JUMP& pkt);
+bool Handle_S_PLAY_SHOOT(Horang::PacketSessionRef& session, Protocol::S_PLAY_SHOOT& pkt);
+bool Handle_S_PLAY_KILL_DEATH(Horang::PacketSessionRef& session, Protocol::S_PLAY_KILL_DEATH& pkt);
+bool Handle_S_PLAY_RESPAWN(Horang::PacketSessionRef& session, Protocol::S_PLAY_RESPAWN& pkt);
+bool Handle_S_PLAY_ROLL(Horang::PacketSessionRef& session, Protocol::S_PLAY_ROLL& pkt);
+bool Handle_S_PLAY_RELOAD(Horang::PacketSessionRef& session, Protocol::S_PLAY_RELOAD& pkt);
 
 class ServerPacketHandler
 {
@@ -70,10 +90,18 @@ public:
 		GPacketHandler[PKT_S_ANOTHER_ENTER_ROOM] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_ANOTHER_ENTER_ROOM>(Handle_S_ANOTHER_ENTER_ROOM, session, buffer, len); };
 		GPacketHandler[PKT_S_ANOTHER_LEAVE_ROOM] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_ANOTHER_LEAVE_ROOM>(Handle_S_ANOTHER_LEAVE_ROOM, session, buffer, len); };
 		GPacketHandler[PKT_S_ROOM_START] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_ROOM_START>(Handle_S_ROOM_START, session, buffer, len); };
+		GPacketHandler[PKT_S_GAME_START] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_GAME_START>(Handle_S_GAME_START, session, buffer, len); };
+		GPacketHandler[PKT_S_GAME_END] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_GAME_END>(Handle_S_GAME_END, session, buffer, len); };
 		GPacketHandler[PKT_S_ROOM_CHANGE_TEAM] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_ROOM_CHANGE_TEAM>(Handle_S_ROOM_CHANGE_TEAM, session, buffer, len); };
 		GPacketHandler[PKT_S_ROOM_KICK] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_ROOM_KICK>(Handle_S_ROOM_KICK, session, buffer, len); };
 		GPacketHandler[PKT_S_PLAY_UPDATE] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_PLAY_UPDATE>(Handle_S_PLAY_UPDATE, session, buffer, len); };
 		GPacketHandler[PKT_S_ROOM_LIST] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_ROOM_LIST>(Handle_S_ROOM_LIST, session, buffer, len); };
+		GPacketHandler[PKT_S_PLAY_JUMP] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_PLAY_JUMP>(Handle_S_PLAY_JUMP, session, buffer, len); };
+		GPacketHandler[PKT_S_PLAY_SHOOT] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_PLAY_SHOOT>(Handle_S_PLAY_SHOOT, session, buffer, len); };
+		GPacketHandler[PKT_S_PLAY_KILL_DEATH] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_PLAY_KILL_DEATH>(Handle_S_PLAY_KILL_DEATH, session, buffer, len); };
+		GPacketHandler[PKT_S_PLAY_RESPAWN] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_PLAY_RESPAWN>(Handle_S_PLAY_RESPAWN, session, buffer, len); };
+		GPacketHandler[PKT_S_PLAY_ROLL] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_PLAY_ROLL>(Handle_S_PLAY_ROLL, session, buffer, len); };
+		GPacketHandler[PKT_S_PLAY_RELOAD] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_PLAY_RELOAD>(Handle_S_PLAY_RELOAD, session, buffer, len); };
 	}
 
 	static bool HandlePacket(Horang::PacketSessionRef& session, BYTE* buffer, int32 len)
@@ -95,6 +123,10 @@ public:
 	static Horang::SendBufferRef MakeSendBuffer(Protocol::C_ROOM_KICK& pkt) { return MakeSendBuffer(pkt, PKT_C_ROOM_KICK); }
 	static Horang::SendBufferRef MakeSendBuffer(Protocol::C_PLAY_UPDATE& pkt) { return MakeSendBuffer(pkt, PKT_C_PLAY_UPDATE); }
 	static Horang::SendBufferRef MakeSendBuffer(Protocol::C_ROOM_LIST_REQUEST& pkt) { return MakeSendBuffer(pkt, PKT_C_ROOM_LIST_REQUEST); }
+	static Horang::SendBufferRef MakeSendBuffer(Protocol::C_PLAY_JUMP& pkt) { return MakeSendBuffer(pkt, PKT_C_PLAY_JUMP); }
+	static Horang::SendBufferRef MakeSendBuffer(Protocol::C_PLAY_SHOOT& pkt) { return MakeSendBuffer(pkt, PKT_C_PLAY_SHOOT); }
+	static Horang::SendBufferRef MakeSendBuffer(Protocol::C_PLAY_ROLL& pkt) { return MakeSendBuffer(pkt, PKT_C_PLAY_ROLL); }
+	static Horang::SendBufferRef MakeSendBuffer(Protocol::C_PLAY_RELOAD& pkt) { return MakeSendBuffer(pkt, PKT_C_PLAY_RELOAD); }
 
 private:
 	template<typename PacketType, typename ProcessFunc>

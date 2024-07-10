@@ -45,9 +45,6 @@
     <ClCompile Include="Struct.pb.cc">
       <Filter>Protocol\ProtoSource</Filter>
     </ClCompile>
-    <ClCompile Include="Enum.pb.cc">
-      <Filter>Protocol\ProtoSource</Filter>
-    </ClCompile>
     <ClCompile Include="Protocol.pb.cc">
       <Filter>Protocol\ProtoSource</Filter>
     </ClCompile>
@@ -59,6 +56,9 @@
     </ClCompile>
     <ClCompile Include="AuthenticationManager.cpp">
       <Filter>GameContents</Filter>
+    </ClCompile>
+    <ClCompile Include="Enum.pb.cc">
+      <Filter>Protocol\ProtoSource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

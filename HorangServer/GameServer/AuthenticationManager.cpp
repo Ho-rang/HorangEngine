@@ -9,6 +9,8 @@
 #include "GameSession.h"
 #include "Log.h"
 
+extern bool g_useDB;
+
 using Horang::LogBuffer;
 
 AuthenticationManagerRef GAuthentication;
@@ -21,6 +23,8 @@ AuthenticationManager::AuthenticationManager()
 bool AuthenticationManager::SignIn(Horang::PacketSessionRef session, std::string id, std::string password)
 {
 	LogBuffer log("SignIn");
+
+	ASSERT_CRASH(g_useDB);
 
 	{
 		// 로그인 되어있는지 검사
@@ -141,6 +145,8 @@ bool AuthenticationManager::SignUp(Horang::PacketSessionRef session, std::string
 {
 	LogBuffer log("SignUp");
 
+	ASSERT_CRASH(g_useDB);
+
 	if (id.length() > 40 ||
 		password.length() > 80 ||
 		nickname.length() > 16)
@@ -235,6 +241,38 @@ void AuthenticationManager::AutoLogin(Horang::PacketSessionRef session)
 	LogBuffer log("AutoLogin");
 
 	static int32 dummyId = 1;
+
+	// 디비 미사용
+	if (!g_useDB)
+	{
+		log << "Not Use DB";
+
+		std::string id = "Guest" + std::to_string(dummyId);
+		std::string nickName = "Guest" + std::to_string(dummyId);
+
+		GameSessionRef gameSession = static_pointer_cast<GameSession>(session);
+
+		PlayerRef player = Horang::MakeShared<Player>();
+		player->uid = dummyId;
+		player->id = id;
+		player->nickname = nickName;
+		player->ownerGameSession = gameSession;
+
+		gameSession->_player = player;
+
+		this->Connect(gameSession);
+
+		// 성공 동작
+		Protocol::S_SIGNIN_OK packet;
+		packet.set_uid(player->uid);
+		packet.set_nickname(player->nickname);
+
+		auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
+		session->Send(sendBuffer);
+
+		log << "Auto Login Success";
+		return;
+	}
 
 	{
 		auto gameSession = static_pointer_cast<GameSession>(session);

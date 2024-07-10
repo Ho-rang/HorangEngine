@@ -26,8 +26,12 @@ public:
 	void ClientUpdate(PlayerWeakRef playerWeak, Protocol::C_PLAY_UPDATE& pkt);
 
 public:
-	void GameStart(PlayerWeakRef playerWeak);
+	void RoomStart(PlayerWeakRef playerWeak);
+	void GameStart();
 	void Update();
+	void GameEnd(bool forceEnd = false, uint64 startTime = 0);
+
+	void GameEndToLobby();
 
 public: // 방 기능
 	// 강퇴
@@ -36,7 +40,14 @@ public: // 방 기능
 	// 팀 변경
 	void ChangeTeam(PlayerWeakRef playerWeak, Protocol::eTeamColor color, std::string targetNickName = "");
 
-
+public: // 인게임 플레이어 관련
+	void PlayJump(PlayerWeakRef playerWeak);
+	void PlayShoot(PlayerWeakRef shooterWeak, uint64 targetUid, Protocol::eHitLocation hitLocation);
+	void PlayHit(uint64 hitPlayerUid, Protocol::eHitLocation hitLocation);
+	void PlayKill(uint64 killPlayerUid, uint64 deathPlayerUid);
+	void PlayRespawn(uint64 deathPlayerUid);
+	void PlayRoll(uint64 playerUid);
+	void PlayReload(uint64 playerUid);
 
 public: // 패킷 작성
 	Protocol::RoomInfo GetRoomInfo();
@@ -66,9 +77,14 @@ private:
 	bool _isPrivate;
 	bool _isTeam;
 
+	Protocol::GameRule _gameRule;
+
 private:
 	// 게임 시간
-	uint64 _gameTime;
+	uint64 _gameStartTime;
+
+	// Todo Debug 
+	uint64 _lastUpdateTime;
 
 	RoomRef _roomRef;
 	RoomWeakRef _roomWeakRef;
@@ -150,21 +166,71 @@ private:
 	std::string _targetNickName;
 };
 
-class GameStartJob : public Horang::IJob
+class RoomStartJob : public Horang::IJob
 {
 public:
-	GameStartJob(RoomWeakRef room, PlayerWeakRef player)
+	RoomStartJob(RoomWeakRef room, PlayerWeakRef player)
 		: _room(room), _player(player)
 	{}
 
 	virtual void Execute() override
 	{
-		_room.lock()->GameStart(_player);
+		_room.lock()->RoomStart(_player);
 	}
 
 private:
 	RoomWeakRef _room;
 	PlayerWeakRef _player;
+};
+
+class GameStartJob : public Horang::IJob
+{
+public:
+	GameStartJob(RoomWeakRef room)
+		: _room(room)
+	{}
+
+	virtual void Execute() override
+	{
+		_room.lock()->GameStart();
+	}
+
+private:
+	RoomWeakRef _room;
+};
+
+class GameEndJob : public Horang::IJob
+{
+public:
+	GameEndJob(RoomWeakRef room, bool forceEnd = false, uint64 startTime = 0)
+		: _room(room), _forceEnd(forceEnd), _startTime(startTime)
+	{}
+
+	virtual void Execute() override
+	{
+		_room.lock()->GameEnd(_forceEnd, _startTime);
+	}
+
+private:
+	RoomWeakRef _room;
+	bool _forceEnd;
+	uint64 _startTime;
+};
+
+class GameEndToLobbyJob : public Horang::IJob
+{
+public:
+	GameEndToLobbyJob(RoomWeakRef room)
+		: _room(room)
+	{}
+
+	virtual void Execute() override
+	{
+		_room.lock()->GameEndToLobby();
+	}
+
+private:
+	RoomWeakRef _room;
 };
 
 class ClientUpdateJob : public Horang::IJob
@@ -199,6 +265,93 @@ public:
 
 private:
 	RoomWeakRef _room;
+};
+
+class PlayJumpJob : public Horang::IJob
+{
+public:
+	PlayJumpJob(RoomWeakRef room, PlayerWeakRef player)
+		: _room(room), _player(player)
+	{}
+
+	virtual void Execute() override
+	{
+		_room.lock()->PlayJump(_player);
+	}
+
+private:
+	RoomWeakRef _room;
+	PlayerWeakRef _player;
+};
+
+class PlayShootJob : public Horang::IJob
+{
+public:
+	PlayShootJob(RoomWeakRef room, PlayerWeakRef shooter, uint64 targetUid, Protocol::eHitLocation hitLocation)
+		: _room(room), _shooter(shooter), _targetUid(targetUid), _hitLocation(hitLocation)
+	{}
+
+	virtual void Execute() override
+	{
+		_room.lock()->PlayShoot(_shooter, _targetUid, _hitLocation);
+	}
+
+private:
+	RoomWeakRef _room;
+	PlayerWeakRef _shooter;
+	uint64 _targetUid;
+	Protocol::eHitLocation _hitLocation;
+};
+
+class PlayRespawnJob : public Horang::IJob
+{
+public:
+	PlayRespawnJob(RoomWeakRef room, uint64 deathPlayerUid)
+		: _room(room), _deathPlayerUid(deathPlayerUid)
+	{}
+
+	virtual void Execute() override
+	{
+		_room.lock()->PlayRespawn(_deathPlayerUid);
+	}
+
+private:
+	RoomWeakRef _room;
+	uint64 _deathPlayerUid;
+};
+
+class PlayRollJob : public Horang::IJob
+{
+public:
+	PlayRollJob(RoomWeakRef room, uint64 playerUid)
+		: _room(room), _playerUid(playerUid)
+	{}
+
+	virtual void Execute() override
+	{
+		_room.lock()->PlayRoll(_playerUid);
+	}
+
+private:
+	RoomWeakRef _room;
+	uint64 _playerUid;
+};
+
+class PlayReloadJob : public Horang::IJob
+{
+public:
+	PlayReloadJob(RoomWeakRef room, uint64 playerUid)
+		: _room(room), _playerUid(playerUid)
+	{}
+
+	virtual void Execute() override
+	{
+		_room.lock()->PlayReload(_playerUid);
+	}
+
+private:
+	RoomWeakRef _room;
+	uint64 _playerUid;
 };
 
 class BroadCastJob : public Horang::IJob

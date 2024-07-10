@@ -75,7 +75,7 @@ bool Handle_S_SIGNIN_OK(Horang::PacketSessionRef& session, Protocol::S_SIGNIN_OK
 
 		packet.set_roomname("TestRoom");
 		packet.set_isteam(true);
-		packet.set_map(Protocol::eRGBMap::DESERT);
+		packet.set_map(Protocol::eRGBMap::MAP_DESERT);
 		packet.set_maxplayercount(6);
 
 		auto sendBuffer = ServerPacketHandler::MakeSendBuffer(packet);
@@ -144,6 +144,16 @@ bool Handle_S_ROOM_START(Horang::PacketSessionRef& session, Protocol::S_ROOM_STA
 	return true;
 }
 
+bool Handle_S_GAME_START(Horang::PacketSessionRef& session, Protocol::S_GAME_START& pkt)
+{
+	return true;
+}
+
+bool Handle_S_GAME_END(Horang::PacketSessionRef& session, Protocol::S_GAME_END& pkt)
+{
+	return true;
+}
+
 bool Handle_S_ROOM_CHANGE_TEAM(Horang::PacketSessionRef& session, Protocol::S_ROOM_CHANGE_TEAM& pkt)
 {
 	return true;
@@ -177,5 +187,35 @@ bool Handle_S_ROOM_LIST(Horang::PacketSessionRef& session, Protocol::S_ROOM_LIST
 		std::cout << " - " << room.currentplayercount() << "Έν" << std::endl;
 	}
 
+	return true;
+}
+
+bool Handle_S_PLAY_JUMP(Horang::PacketSessionRef& session, Protocol::S_PLAY_JUMP& pkt)
+{
+	return true;
+}
+
+bool Handle_S_PLAY_SHOOT(Horang::PacketSessionRef& session, Protocol::S_PLAY_SHOOT& pkt)
+{
+	return true;
+}
+
+bool Handle_S_PLAY_KILL_DEATH(Horang::PacketSessionRef& session, Protocol::S_PLAY_KILL_DEATH& pkt)
+{
+	return true;
+}
+
+bool Handle_S_PLAY_RESPAWN(Horang::PacketSessionRef& session, Protocol::S_PLAY_RESPAWN& pkt)
+{
+	return true;
+}
+
+bool Handle_S_PLAY_ROLL(Horang::PacketSessionRef& session, Protocol::S_PLAY_ROLL& pkt)
+{
+	return true;
+}
+
+bool Handle_S_PLAY_RELOAD(Horang::PacketSessionRef& session, Protocol::S_PLAY_RELOAD& pkt)
+{
 	return true;
 }

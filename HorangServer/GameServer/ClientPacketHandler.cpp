@@ -198,8 +198,7 @@ bool Handle_C_ROOM_LEAVE(Horang::PacketSessionRef& session, Protocol::C_ROOM_LEA
 	auto gameSession = static_pointer_cast<GameSession>(session);
 
 	auto room = gameSession->_room.lock();
-	if (room == nullptr)
-		return false;
+	if (room == nullptr) [[unlikely]] return false;
 
 	room->Push(Horang::MakeShared<LeaveJob>(room, static_pointer_cast<GameSession>(session)->_player));
 
@@ -211,10 +210,9 @@ bool Handle_C_ROOM_START(Horang::PacketSessionRef& session, Protocol::C_ROOM_STA
 	auto gameSession = static_pointer_cast<GameSession>(session);
 
 	auto room = gameSession->_room.lock();
-	if (room == nullptr)
-		return false;
+	if (room == nullptr) [[unlikely]] return false;
 
-	room->Push(Horang::MakeShared<GameStartJob>(room, gameSession->_player));
+	room->Push(Horang::MakeShared<RoomStartJob>(room, gameSession->_player));
 
 	return true;
 }
@@ -224,8 +222,7 @@ bool Handle_C_ROOM_CHANGE_TEAM(Horang::PacketSessionRef& session, Protocol::C_RO
 	auto gameSession = static_pointer_cast<GameSession>(session);
 
 	auto room = gameSession->_room.lock();
-	if (room == nullptr)
-		return false;
+	if (room == nullptr) [[unlikely]] return false;
 
 	room->Push(Horang::MakeShared<TeamChangeJob>(room, gameSession->_player, pkt.teamcolor(), pkt.targetnickname()));
 
@@ -237,8 +234,7 @@ bool Handle_C_ROOM_KICK(Horang::PacketSessionRef& session, Protocol::C_ROOM_KICK
 	auto gameSession = static_pointer_cast<GameSession>(session);
 
 	auto room = gameSession->_room.lock();
-	if (room == nullptr)
-		return false;
+	if (room == nullptr) [[unlikely]] return false;
 
 	room->Push(Horang::MakeShared<KickJob>(room, gameSession->_player, pkt.targetnickname()));
 
@@ -250,8 +246,7 @@ bool Handle_C_PLAY_UPDATE(Horang::PacketSessionRef& session, Protocol::C_PLAY_UP
 	auto gameSession = static_pointer_cast<GameSession>(session);
 
 	auto room = gameSession->_room.lock();
-	if (room == nullptr)
-		return false;
+	if (room == nullptr) [[unlikely]] return false;
 
 	room->Push(Horang::MakeShared<ClientUpdateJob>(gameSession->_room, gameSession->_player, pkt));
 
@@ -263,6 +258,54 @@ bool Handle_C_ROOM_LIST_REQUEST(Horang::PacketSessionRef& session, Protocol::C_R
 	auto gameSession = static_pointer_cast<GameSession>(session);
 
 	GRoomManager->Push(Horang::MakeShared<SendRoomListJob>(gameSession->_player));
+
+	return true;
+}
+
+bool Handle_C_PLAY_JUMP(Horang::PacketSessionRef& session, Protocol::C_PLAY_JUMP& pkt)
+{
+	auto gameSession = static_pointer_cast<GameSession>(session);
+
+	auto room = gameSession->_room.lock();
+	if (room == nullptr) [[unlikely]] return false;
+
+	room->Push(Horang::MakeShared<PlayJumpJob>(room, gameSession->_player));
+
+	return true;
+}
+
+bool Handle_C_PLAY_SHOOT(Horang::PacketSessionRef& session, Protocol::C_PLAY_SHOOT& pkt)
+{
+	auto gameSession = static_pointer_cast<GameSession>(session);
+
+	auto room = gameSession->_room.lock();
+	if (room == nullptr) [[unlikely]] return false;
+
+	room->Push(Horang::MakeShared<PlayShootJob>(room, gameSession->_player, pkt.hittargetuid(), pkt.hitlocation()));
+
+	return true;
+}
+
+bool Handle_C_PLAY_ROLL(Horang::PacketSessionRef& session, Protocol::C_PLAY_ROLL& pkt)
+{
+	auto gameSession = static_pointer_cast<GameSession>(session);
+
+	auto room = gameSession->_room.lock();
+	if (room == nullptr) [[unlikely]] return false;
+
+	room->Push(Horang::MakeShared<PlayRollJob>(room, gameSession->_player->uid));
+
+	return true;
+}
+
+bool Handle_C_PLAY_RELOAD(Horang::PacketSessionRef& session, Protocol::C_PLAY_RELOAD& pkt)
+{
+	auto gameSession = static_pointer_cast<GameSession>(session);
+
+	auto room = gameSession->_room.lock();
+	if (room == nullptr) [[unlikely]] return false;
+
+	room->Push(Horang::MakeShared<PlayReloadJob>(room, gameSession->_player->uid));
 
 	return true;
 }

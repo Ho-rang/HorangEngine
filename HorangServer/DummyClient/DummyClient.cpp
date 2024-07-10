@@ -5,6 +5,7 @@
 #include "ThreadManager.h"
 #include "BufferReader.h"
 #include "ServerPacketHandler.h"
+#include <fstream>
 
 using namespace std::chrono_literals;
 
@@ -44,15 +45,41 @@ int main()
 {
 	ServerPacketHandler::Init();
 
-
 	int count = 64 * 4;
 
-	Horang::ClientServiceRef service = Horang::MakeShared<Horang::ClientService>(
-		Horang::NetAddress(L"172.16.1.13", 7777),
-		Horang::MakeShared<Horang::IocpCore>(),
-		Horang::MakeShared<ServerSession>, // TODO : SessionManager 등
-		1
-	);
+	Horang::ClientServiceRef service;
+
+	std::wifstream ipAddressFile("serverIP.txt");
+	std::wstring ipAddressStr = L"";
+	if (ipAddressFile.is_open())
+	{
+		std::getline(ipAddressFile, ipAddressStr);
+
+		service = Horang::MakeShared<Horang::ClientService>(
+			Horang::NetAddress(ipAddressStr, 7776),
+			Horang::MakeShared<Horang::IocpCore>(),
+			Horang::MakeShared<ServerSession>, // TODO : SessionManager 등
+			1
+		);
+	}
+	else
+	{
+		service = Horang::MakeShared<Horang::ClientService>(
+			Horang::NetAddress(L"172.16.1.13", 7776),
+			Horang::MakeShared<Horang::IocpCore>(),
+			Horang::MakeShared<ServerSession>, // TODO : SessionManager 등
+			1
+		);
+	}
+
+	ipAddressFile.close();
+
+	//Horang::ClientServiceRef service = Horang::MakeShared<Horang::ClientService>(
+	//	Horang::NetAddress(L"172.16.1.13", 7777),
+	//	Horang::MakeShared<Horang::IocpCore>(),
+	//	Horang::MakeShared<ServerSession>, // TODO : SessionManager 등
+	//	1
+	//);
 
 	ASSERT_CRASH(service->Start());
 
@@ -114,7 +141,7 @@ int main()
 		}
 		else if (menu == 3)
 		{
-			
+
 		}
 		::system("pause");
 		::system("cls");

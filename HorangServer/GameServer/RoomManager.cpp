@@ -47,6 +47,8 @@ void RoomManager::Initialize()
 
 RoomRef RoomManager::CreateRoom(std::string roomName /*= "DefaultRoomName"*/, std::string password /*= ""*/, int32 maxPlayerCount /*= 6*/, bool isPrivate /*= false*/, bool isTeam /*= false*/, int32 dummyClient /*= 0*/)
 {
+	// Todo 플레이어 룸 유효 체크
+
 	LogBuffer log("CreateRoom");
 	log << "roomName: " << roomName << " password: " << password << " maxPlayerCount: " << maxPlayerCount << " isPrivate: " << isPrivate << " isTeam: " << isTeam << " dummyClient: " << dummyClient;
 
@@ -116,6 +118,12 @@ void RoomManager::RoomListUpdate()
 	{
 		if (room->_state != Protocol::ROOM_STATE_LOBBY)
 			continue;
+
+		if (room->_players.size() <= 0)
+		{
+			this->DestroyRoom(room);
+			continue;
+		}
 
 		auto roomInfo = _roomList.add_roominfo();
 		room->GetRoomInfoList(roomInfo);
