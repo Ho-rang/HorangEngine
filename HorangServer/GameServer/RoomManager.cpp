@@ -110,12 +110,21 @@ void RoomManager::RoomListUpdate()
 	static uint64 _lastRoomListUpdateTime = 0;
 
 	if (_lastRoomListUpdateTime > ::GetTickCount64())
+	{
+		log << "- Not Yet";
 		return;
+	}
 
 	_roomList.Clear();
 
 	for (const auto& [code, room] : _rooms)
 	{
+		if (room == nullptr)
+		{
+			log << "Nullptr : " << code;
+			continue;
+		}
+
 		if (room->_state != Protocol::ROOM_STATE_LOBBY)
 			continue;
 
@@ -129,7 +138,7 @@ void RoomManager::RoomListUpdate()
 		room->GetRoomInfoList(roomInfo);
 	}
 
-	_lastRoomListUpdateTime = ::GetTickCount64() + 100;
+	_lastRoomListUpdateTime = ::GetTickCount64() + 1000;
 
 	log << "Success";
 }
@@ -144,10 +153,10 @@ void RoomManager::SendRoomList(PlayerWeakRef player)
 		log.PlayerNullptr();
 		return;
 	}
-
 	log << "ID: " << playerRef->id << "NickName :" << playerRef->nickname;
 
 	this->RoomListUpdate();
+	log << "Count: " << _rooms.size();
 
 	auto sendBuffer = ClientPacketHandler::MakeSendBuffer(_roomList);
 	playerRef->ownerGameSession->Send(sendBuffer);

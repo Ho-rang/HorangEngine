@@ -40,6 +40,8 @@ public: // 방 기능
 	// 팀 변경
 	void ChangeTeam(PlayerWeakRef playerWeak, Protocol::eTeamColor color, std::string targetNickName = "");
 
+	void RoomChat(PlayerWeakRef playerWeak, std::string chat);
+
 public: // 인게임 플레이어 관련
 	void PlayJump(PlayerWeakRef playerWeak);
 	void PlayShoot(PlayerWeakRef shooterWeak, uint64 targetUid, Protocol::eHitLocation hitLocation);
@@ -352,6 +354,24 @@ public:
 private:
 	RoomWeakRef _room;
 	uint64 _playerUid;
+};
+
+class RoomChatJob : public Horang::IJob
+{
+public:
+	RoomChatJob(RoomWeakRef room, PlayerWeakRef player, std::string chat)
+		: _room(room), _player(player), _chat(chat)
+	{}
+
+	virtual void Execute() override
+	{
+		_room.lock()->RoomChat(_player, _chat);
+	}
+
+private:
+	RoomWeakRef _room;
+	PlayerWeakRef _player;
+	std::string _chat;
 };
 
 class BroadCastJob : public Horang::IJob

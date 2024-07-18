@@ -165,7 +165,6 @@ bool Room::Leave(PlayerWeakRef playerWeak)
 	if (this->_players[player->uid].data.host() == true)
 	{
 		log << "Host Leave";
-		this->_players[player->uid].data.set_host(false);
 		for (auto& [uid, player] : this->_players)
 		{
 			if (player.data.host() == false)
@@ -175,6 +174,7 @@ bool Room::Leave(PlayerWeakRef playerWeak)
 				break;
 			}
 		}
+		this->_players[player->uid].data.set_host(false);
 	}
 
 	this->_players.erase(player->uid);
@@ -295,7 +295,7 @@ void Room::RoomStart(PlayerWeakRef playerWeak)
 	_gameRule.set_desiredkill(30); // 30
 	_gameRule.set_maxhp(100); // 100
 	_gameRule.set_respawntime(2); // 2 or 3
-	_gameRule.set_spawnindexrange(std::max(6, 9)); // 9
+	_gameRule.set_spawnindexrange(std::max(6, 17)); // 9
 
 	// Todo 시작지점 설정
 	// Todo 플레이어 위치 설정
@@ -653,6 +653,39 @@ void Room::ChangeTeam(PlayerWeakRef playerWeak, Protocol::eTeamColor color, std:
 	log << "Success";
 }
 
+void Room::RoomChat(PlayerWeakRef playerWeak, std::string chat)
+{
+	LogBuffer log("Chat");
+
+	if (this->_state != Protocol::ROOM_STATE_LOBBY)
+	{
+		log << "Not Lobby";
+		return;
+	}
+
+	auto player = playerWeak.lock();
+	if (player == nullptr)
+	{
+		log.PlayerNullptr();
+		return;
+	}
+
+	if (this->_players.find(player->uid) == this->_players.end())
+	{
+		log << "Not Found Player";
+		return;
+	}
+
+	Protocol::S_ROOM_CHAT packet;
+	packet.set_nickname(player->nickname);
+	packet.set_chat(chat);
+
+	auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
+	this->BroadCast(sendBuffer);
+
+	log << "Player : " << player->nickname;
+}
+
 void Room::PlayJump(PlayerWeakRef playerWeak)
 {
 	LogBuffer log("Jump");
@@ -934,7 +967,7 @@ void Room::GetRoomInfo(Protocol::RoomInfo& roomInfo)
 			continue;
 
 		auto playerData = roomInfo.add_users();
-		this->GetPlayerData(playerData, playerRef->uid);
+		(*playerData) = player.data;
 	}
 
 	roomInfo.set_roomname(_roomName);

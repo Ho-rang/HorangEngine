@@ -271,6 +271,7 @@ void AuthenticationManager::AutoLogin(Horang::PacketSessionRef session)
 		session->Send(sendBuffer);
 
 		log << "Auto Login Success";
+		dummyId++;
 		return;
 	}
 

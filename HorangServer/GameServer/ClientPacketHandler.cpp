@@ -309,3 +309,15 @@ bool Handle_C_PLAY_RELOAD(Horang::PacketSessionRef& session, Protocol::C_PLAY_RE
 
 	return true;
 }
+
+bool Handle_C_ROOM_CHAT(Horang::PacketSessionRef& session, Protocol::C_ROOM_CHAT& pkt)
+{
+	auto gameSession = static_pointer_cast<GameSession>(session);
+
+	auto room = gameSession->_room.lock();
+	if (room == nullptr) [[unlikely]] return false;
+
+	room->Push(Horang::MakeShared<RoomChatJob>(room, gameSession->_player, pkt.chat()));
+
+	return true;
+}

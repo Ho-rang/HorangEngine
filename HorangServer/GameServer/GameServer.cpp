@@ -49,24 +49,28 @@ public:
 };
 
 bool g_useDB = false;
-int g_gameTime = 60;
+int g_gameTime = 120;
 
 int main(int argc, char* argv[])
 {
-	std::wstring ip = L"127.0.0.1";
+	// 172.16.1.13
+	//std::wstring ip = L"127.0.0.1";
+	std::wstring ip = L"172.16.1.13";
 	int port = 7777;
+	if (ip == L"172.16.1.13")
+		g_useDB = true;
 
-	if (argc >= 1)
+	if (argc >= 2)
 	{
 		std::string str(argv[1]);
 		ip = std::wstring(str.begin(), str.end());
 	}
-	if (argc >= 2)
-		port = atoi(argv[2]);
 	if (argc >= 3)
+		port = atoi(argv[2]);
+	if (argc >= 4)
 		if (strcmp(argv[3], "true") == 0)
 			g_useDB = true;
-	if (argc >= 4)
+	if (argc >= 5)
 		g_gameTime = atoi(argv[4]);
 
 	if (g_useDB)
@@ -95,7 +99,6 @@ int main(int argc, char* argv[])
 	std::wcout << L"Server IP : " << ip.c_str() << " : " << port << " " << g_useDB << std::endl;
 	std::wcout << L"GameTime : " << g_gameTime << " seconds" << std::endl;
 
-	// 172.16.1.13
 	Horang::ServerServiceRef service = Horang::MakeShared<Horang::ServerService>(
 		Horang::NetAddress(ip.c_str(), port),
 		Horang::MakeShared<Horang::IocpCore>(),
