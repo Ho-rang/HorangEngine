@@ -399,5 +399,8 @@ FodyWeavers.xsd
 
 # HorangEngine 
 !Libraries/
+!Libraries/**
 !Common/
+!Common/**
 !Tools/
+!Tools/**
