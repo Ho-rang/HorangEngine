@@ -56,7 +56,7 @@ int main()
 		std::getline(ipAddressFile, ipAddressStr);
 
 		service = Horang::MakeShared<Horang::ClientService>(
-			Horang::NetAddress(ipAddressStr, 7776),
+			Horang::NetAddress(ipAddressStr, 7777),
 			Horang::MakeShared<Horang::IocpCore>(),
 			Horang::MakeShared<ServerSession>, // TODO : SessionManager 등
 			1
@@ -65,7 +65,7 @@ int main()
 	else
 	{
 		service = Horang::MakeShared<Horang::ClientService>(
-			Horang::NetAddress(L"172.16.1.13", 7776),
+			Horang::NetAddress(L"14.35.98.143", 7777),
 			Horang::MakeShared<Horang::IocpCore>(),
 			Horang::MakeShared<ServerSession>, // TODO : SessionManager 등
 			1

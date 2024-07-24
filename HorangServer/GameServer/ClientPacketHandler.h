@@ -48,6 +48,8 @@ enum : uint16
 	PKT_S_PLAY_RELOAD = 1039,
 	PKT_C_ROOM_CHAT = 1040,
 	PKT_S_ROOM_CHAT = 1041,
+	PKT_C_SIGNOUT = 1042,
+	PKT_S_SIGNOUT_OK = 1043,
 };
 
 // Custom Handlers
@@ -71,6 +73,7 @@ bool Handle_C_PLAY_SHOOT(Horang::PacketSessionRef& session, Protocol::C_PLAY_SHO
 bool Handle_C_PLAY_ROLL(Horang::PacketSessionRef& session, Protocol::C_PLAY_ROLL& pkt);
 bool Handle_C_PLAY_RELOAD(Horang::PacketSessionRef& session, Protocol::C_PLAY_RELOAD& pkt);
 bool Handle_C_ROOM_CHAT(Horang::PacketSessionRef& session, Protocol::C_ROOM_CHAT& pkt);
+bool Handle_C_SIGNOUT(Horang::PacketSessionRef& session, Protocol::C_SIGNOUT& pkt);
 
 class ClientPacketHandler
 {
@@ -98,6 +101,7 @@ public:
 		GPacketHandler[PKT_C_PLAY_ROLL] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::C_PLAY_ROLL>(Handle_C_PLAY_ROLL, session, buffer, len); };
 		GPacketHandler[PKT_C_PLAY_RELOAD] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::C_PLAY_RELOAD>(Handle_C_PLAY_RELOAD, session, buffer, len); };
 		GPacketHandler[PKT_C_ROOM_CHAT] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::C_ROOM_CHAT>(Handle_C_ROOM_CHAT, session, buffer, len); };
+		GPacketHandler[PKT_C_SIGNOUT] = [](Horang::PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::C_SIGNOUT>(Handle_C_SIGNOUT, session, buffer, len); };
 	}
 
 	static bool HandlePacket(Horang::PacketSessionRef& session, BYTE* buffer, int32 len)
@@ -128,6 +132,7 @@ public:
 	static Horang::SendBufferRef MakeSendBuffer(Protocol::S_PLAY_ROLL& pkt) { return MakeSendBuffer(pkt, PKT_S_PLAY_ROLL); }
 	static Horang::SendBufferRef MakeSendBuffer(Protocol::S_PLAY_RELOAD& pkt) { return MakeSendBuffer(pkt, PKT_S_PLAY_RELOAD); }
 	static Horang::SendBufferRef MakeSendBuffer(Protocol::S_ROOM_CHAT& pkt) { return MakeSendBuffer(pkt, PKT_S_ROOM_CHAT); }
+	static Horang::SendBufferRef MakeSendBuffer(Protocol::S_SIGNOUT_OK& pkt) { return MakeSendBuffer(pkt, PKT_S_SIGNOUT_OK); }
 
 private:
 	template<typename PacketType, typename ProcessFunc>

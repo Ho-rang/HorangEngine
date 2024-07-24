@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 	std::wstring ip = L"172.16.1.13";
 	int port = 7777;
 	if (ip == L"172.16.1.13")
-		g_useDB = true;
+		g_useDB = false;
 
 	if (argc >= 2)
 	{

@@ -107,32 +107,32 @@ namespace Horang
 
 		LogBuffer(const std::string& log)
 		{
-#ifdef _DEBUG
+//#ifdef _DEBUG
 			stream << log << " - ";
-#endif // _DEBUG
+//#endif // _DEBUG
 		}
 
 		~LogBuffer()
 		{
-#ifdef _DEBUG
+//#ifdef _DEBUG
 			std::cout << stream.str() << std::endl;
-#endif // _DEBUG
+//#endif // _DEBUG
 		}
 
 		template <typename T>
 		LogBuffer& operator<<(const T& value)
 		{
-#ifdef _DEBUG
+//#ifdef _DEBUG
 			stream << value << " ";
-#endif // _DEBUG
+//#endif // _DEBUG
 			return *this;
 		}
 
 		void PlayerNullptr()
 		{
-#ifdef _DEBUG
+//#ifdef _DEBUG
 			stream << "Player nullptr ";
-#endif // _DEBUG
+//#endif // _DEBUG
 		}
 
 	private:

@@ -41,7 +41,7 @@ bool Handle_C_MOVE(Horang::PacketSessionRef& session, Protocol::C_MOVE& pkt)
 
 bool Handle_C_AUTOLOGIN(Horang::PacketSessionRef& session, Protocol::C_AUTOLOGIN& pkt)
 {
-	GAuthentication->Push(Horang::MakeShared<AutoLoginJob>(session));
+	GAuthentication->Push(Horang::MakeShared<AutoLoginJob>(session, pkt.nickname()));
 	return true;
 }
 
@@ -168,6 +168,9 @@ bool Handle_C_ROOM_CREATE(Horang::PacketSessionRef& session, Protocol::C_ROOM_CR
 {
 	auto gameSession = static_pointer_cast<GameSession>(session);
 
+	if (pkt.roomname().length() == 0)
+		pkt.set_roomname("DefaultRoomName");
+
 	GRoomManager->Push(Horang::MakeShared<CreateRoomJob>(gameSession->_player, pkt.roomname(),
 		pkt.password(),
 		pkt.maxplayercount(),
@@ -200,7 +203,8 @@ bool Handle_C_ROOM_LEAVE(Horang::PacketSessionRef& session, Protocol::C_ROOM_LEA
 	auto room = gameSession->_room.lock();
 	if (room == nullptr) [[unlikely]] return false;
 
-	room->Push(Horang::MakeShared<LeaveJob>(room, static_pointer_cast<GameSession>(session)->_player));
+	auto player = gameSession->_player;
+	room->Push(Horang::MakeShared<LeaveJob>(room, player, player->uid));
 
 	return true;
 }
@@ -318,6 +322,15 @@ bool Handle_C_ROOM_CHAT(Horang::PacketSessionRef& session, Protocol::C_ROOM_CHAT
 	if (room == nullptr) [[unlikely]] return false;
 
 	room->Push(Horang::MakeShared<RoomChatJob>(room, gameSession->_player, pkt.chat()));
+
+	return true;
+}
+
+bool Handle_C_SIGNOUT(Horang::PacketSessionRef& session, Protocol::C_SIGNOUT& pkt)
+{
+	auto gameSession = static_pointer_cast<GameSession>(session);
+
+	GAuthentication->Push(Horang::MakeShared<SignOutJob>(session));
 
 	return true;
 }

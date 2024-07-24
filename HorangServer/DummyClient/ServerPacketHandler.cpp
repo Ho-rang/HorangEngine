@@ -219,3 +219,13 @@ bool Handle_S_PLAY_RELOAD(Horang::PacketSessionRef& session, Protocol::S_PLAY_RE
 {
 	return true;
 }
+
+bool Handle_S_ROOM_CHAT(Horang::PacketSessionRef& session, Protocol::S_ROOM_CHAT& pkt)
+{
+	return true;
+}
+
+bool Handle_S_SIGNOUT_OK(Horang::PacketSessionRef& session, Protocol::S_SIGNOUT_OK& pkt)
+{
+	return true;
+}

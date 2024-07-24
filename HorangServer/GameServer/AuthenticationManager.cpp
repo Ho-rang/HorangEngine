@@ -236,7 +236,7 @@ void AuthenticationManager::PrintActiveAccount()
 	}
 }
 
-void AuthenticationManager::AutoLogin(Horang::PacketSessionRef session)
+void AuthenticationManager::AutoLogin(Horang::PacketSessionRef session, std::string userNickName)
 {
 	LogBuffer log("AutoLogin");
 
@@ -248,7 +248,7 @@ void AuthenticationManager::AutoLogin(Horang::PacketSessionRef session)
 		log << "Not Use DB";
 
 		std::string id = "Guest" + std::to_string(dummyId);
-		std::string nickName = "Guest" + std::to_string(dummyId);
+		std::string nickName = userNickName.length() > 0 ? userNickName : "Guest" + std::to_string(dummyId);
 
 		GameSessionRef gameSession = static_pointer_cast<GameSession>(session);
 
@@ -313,7 +313,7 @@ void AuthenticationManager::AutoLogin(Horang::PacketSessionRef session)
 
 		std::string id = "test" + std::to_string(dummyId);
 		std::string password = "test" + std::to_string(dummyId);
-		std::string nickname = "test" + std::to_string(dummyId);
+		std::string nickname = userNickName.length() > 0 ? userNickName : "test" + std::to_string(dummyId);
 
 		WCHAR wid[40] = L"";
 		WCHAR wpassword[80] = L"";
@@ -400,6 +400,29 @@ void AuthenticationManager::AutoLogin(Horang::PacketSessionRef session)
 	log << "Auto Login : " << dummyId << "Success";
 }
 
+void AuthenticationManager::Logout(Horang::PacketSessionRef session)
+{
+	LogBuffer log("Logout");
+
+	auto gameSession = static_pointer_cast<GameSession>(session);
+
+	if (gameSession->_player == nullptr)
+		return;
+
+	log << "Logout : " << gameSession->_player->nickname;
+
+	this->Disconnect(gameSession->_player->uid);
+
+	gameSession->_player = nullptr;
+
+	Protocol::S_SIGNOUT_OK packet;
+
+	auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
+	session->Send(sendBuffer);
+
+	log << "Success";
+}
+
 bool AuthenticationManager::isConnect(int32 uid)
 {
 	return _activeAccount.find(uid) != _activeAccount.end();
@@ -422,5 +445,10 @@ void DisconnectJob::Execute()
 
 void AutoLoginJob::Execute()
 {
-	GAuthentication->AutoLogin(_session);
+	GAuthentication->AutoLogin(_session, _nickname);
+}
+
+void SignOutJob::Execute()
+{
+	GAuthentication->Logout(_session);
 }

@@ -132,7 +132,7 @@ bool Room::Enter(PlayerWeakRef playerWeak, std::string password)
 	return true;
 }
 
-bool Room::Leave(PlayerWeakRef playerWeak)
+bool Room::Leave(PlayerWeakRef playerWeak, int32 uid)
 {
 	LogBuffer log("Leave");
 
@@ -158,6 +158,7 @@ bool Room::Leave(PlayerWeakRef playerWeak)
 	if (player == nullptr)
 	{
 		log.PlayerNullptr();
+		this->_players.erase(uid);
 		return false;
 	}
 
@@ -165,12 +166,12 @@ bool Room::Leave(PlayerWeakRef playerWeak)
 	if (this->_players[player->uid].data.host() == true)
 	{
 		log << "Host Leave";
-		for (auto& [uid, player] : this->_players)
+		for (auto& [uid, p] : this->_players)
 		{
-			if (player.data.host() == false)
+			if (p.data.host() == false)
 			{
-				player.data.set_host(true);
-				log << "New Host : " << player.data.userinfo().nickname();
+				p.data.set_host(true);
+				log << "New Host : " << p.data.userinfo().nickname();
 				break;
 			}
 		}
@@ -208,6 +209,9 @@ void Room::BroadCast(Horang::SendBufferRef sendBuffer)
 {
 	for (auto& [id, playerData] : _players)
 	{
+		if (playerData.player.expired())
+			continue;
+
 		auto player = playerData.player.lock();
 		// Todo dummy 고려한 코드
 		if (player == nullptr)
@@ -289,12 +293,11 @@ void Room::RoomStart(PlayerWeakRef playerWeak)
 
 	this->_state = Protocol::eRoomState::ROOM_STATE_PLAY;
 
-	// 룰 설정 // Todo DB로 교체될수도 있음
+	// 룰 설정 
 	_gameRule.set_gametime(g_gameTime); // 120
-	//_gameRule.set_gametime(g_gameTime); // 120
-	_gameRule.set_desiredkill(30); // 30
+	_gameRule.set_desiredkill(10); // 10
 	_gameRule.set_maxhp(100); // 100
-	_gameRule.set_respawntime(2); // 2 or 3
+	_gameRule.set_respawntime(2); // 2
 	_gameRule.set_spawnindexrange(std::max(6, 17)); // 9
 
 	// Todo 시작지점 설정
@@ -999,11 +1002,11 @@ void Room::GetRoomInfoList(Protocol::RoomInfo* roomInfo)
 void Room::SetUpdatePacket(Protocol::S_PLAY_UPDATE& packet)
 {
 	this->GetRoomInfo(packet.mutable_roominfo());
-	for (auto& [uid, playerData] : _players)
+	/*for (auto& [uid, playerData] : _players)
 	{
 		auto player = packet.add_playerdata();
 		player->CopyFrom(playerData.data);
-	}
+	}*/
 }
 
 void Room::GetPlayerData(Protocol::PlayerData* playerData, int32 uid)

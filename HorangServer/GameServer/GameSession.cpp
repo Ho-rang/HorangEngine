@@ -7,6 +7,7 @@
 #include "Room.h"
 #include "AuthenticationManager.h"
 #include "Player.h"
+#include "JobTimer.h"
 
 void GameSession::OnConnected()
 {
@@ -24,15 +25,18 @@ void GameSession::OnDisconnected()
 	{
 		if (auto room = _room.lock())
 		{
-			room->Push(Horang::MakeShared<LeaveJob>(room, _player));
+			room->Push(Horang::MakeShared<LeaveJob>(room, _player,_player->uid));
 		}
 
-		GAuthentication->Push(Horang::MakeShared<DisconnectJob>(_player->uid));
+		// 1초뒤에 DisconnectJob 넣어주기
+		//GAuthentication->Push(Horang::MakeShared<DisconnectJob>(_player->uid));
+		auto job = Horang::MakeShared<DisconnectJob>(_player->uid);
+		GJobTimer->Reserve(1000, GAuthentication->weak_from_this(), job);
 	}
 
 	GSessionManager->Remove(static_pointer_cast<GameSession>(shared_from_this()));
 
-	_player = nullptr;
+	// _player = nullptr;
 }
 
 void GameSession::OnRecvPacket(BYTE* buffer, int32 len)

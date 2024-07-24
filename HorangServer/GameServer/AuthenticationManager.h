@@ -13,7 +13,9 @@ public:
 
 public: // Debg
 	void PrintActiveAccount();
-	void AutoLogin(Horang::PacketSessionRef session);
+	void AutoLogin(Horang::PacketSessionRef session, std::string userNickName);
+
+	void Logout(Horang::PacketSessionRef session);
 
 private:
 	bool Connect(GameSessionRef session);
@@ -74,7 +76,21 @@ private:
 class AutoLoginJob : public Horang::IJob
 {
 public:
-	AutoLoginJob(Horang::PacketSessionRef session)
+	AutoLoginJob(Horang::PacketSessionRef session, std::string nickName)
+		: _session(session), _nickname(nickName)
+	{}
+
+	virtual void Execute() override;
+
+private:
+	Horang::PacketSessionRef _session;
+	std::string _nickname;
+};
+
+class SignOutJob : public Horang::IJob
+{
+public:
+	SignOutJob(Horang::PacketSessionRef session)
 		: _session(session)
 	{}
 

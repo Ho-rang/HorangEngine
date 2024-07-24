@@ -21,7 +21,7 @@ public:
 
 public:
 	bool Enter(PlayerWeakRef playerWeak, std::string password = "");
-	bool Leave(PlayerWeakRef playerWeak);
+	bool Leave(PlayerWeakRef playerWeak, int32 uid);
 	void BroadCast(Horang::SendBufferRef sendBuffer);
 	void ClientUpdate(PlayerWeakRef playerWeak, Protocol::C_PLAY_UPDATE& pkt);
 
@@ -117,18 +117,19 @@ private:
 class LeaveJob : public Horang::IJob
 {
 public:
-	LeaveJob(RoomWeakRef room, PlayerWeakRef player)
-		: _room(room), _player(player)
+	LeaveJob(RoomWeakRef room, PlayerWeakRef player, int32 uid)
+		: _room(room), _player(player), uid(uid)
 	{}
 
 	virtual void Execute() override
 	{
-		_room.lock()->Leave(_player);
+		_room.lock()->Leave(_player, uid);
 	}
 
 private:
 	RoomWeakRef _room;
 	PlayerWeakRef _player;
+	int32 uid;
 };
 
 class KickJob : public Horang::IJob
